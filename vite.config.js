@@ -18,6 +18,12 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    open: true,
+    open: false,
+  },
+  /* Treat the plain JS files as assets so Vite copies them
+     without trying to parse them as ES modules */
+  assetsInclude: ['**/*.jpg', '**/*.jpeg', '**/*.png', '**/*.gif', '**/*.svg'],
+  optimizeDeps: {
+    exclude: [],
   },
 });
