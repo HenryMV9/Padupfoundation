@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "Pad Up Foundation NGO Website",
   "scripts": {
-    "dev": "node node_modules/vite/bin/vite.js",
-    "build": "node node_modules/vite/bin/vite.js build",
-    "preview": "node node_modules/vite/bin/vite.js preview"
+    "preinstall": "node -e \"const fs=require('fs'),p=require('path'),d=p.join('node_modules','@rollup');if(fs.existsSync(d)){fs.readdirSync(d).filter(f=>!f.includes(process.platform)).forEach(f=>{fs.rmSync(p.join(d,f),{recursive:true,force:true})})}\"",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "devDependencies": {
     "vite": "^5.4.0"
