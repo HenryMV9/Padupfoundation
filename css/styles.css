@@ -297,6 +297,8 @@ p { line-height: 1.7; color: var(--gray-600); }
   z-index: 1000;
   height: var(--nav-height);
   transition: all var(--transition-slow);
+  will-change: background-color, height, box-shadow;
+  transform: translateZ(0);
 }
 
 .navbar.transparent {
@@ -499,17 +501,13 @@ p { line-height: 1.7; color: var(--gray-600); }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scale(1.08);
+  transform: scale(1.08) translateZ(0);
   transition: transform 8s ease;
+  will-change: transform;
 }
 
 .hero-slide.active img {
-  transform: scale(1.0);
-}
-
-/* Ken Burns on next slide */
-.hero-slide.next img {
-  transform: scale(1.08);
+  transform: scale(1.0) translateZ(0);
 }
 
 .hero-overlay {
