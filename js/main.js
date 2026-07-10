@@ -76,7 +76,7 @@
   }
 
   function startAutoplay() {
-    timer = setInterval(function () { goToSlide(current + 1); }, 6000);
+    timer = setInterval(function () { goToSlide(current + 1); }, 5000);
   }
 
   function stopAutoplay() { clearInterval(timer); }
