@@ -66,16 +66,26 @@
 
   let current = 0;
   let timer;
+  let transitioning = false;
 
   function goToSlide(index) {
+    if (transitioning) return;
+    if (index === current) return;
+    transitioning = true;
+
     slides[current].classList.remove('active');
     if (dots[current]) dots[current].classList.remove('active');
+
     current = (index + slides.length) % slides.length;
+
     slides[current].classList.add('active');
     if (dots[current]) dots[current].classList.add('active');
+
+    setTimeout(function () { transitioning = false; }, 1500);
   }
 
   function startAutoplay() {
+    stopAutoplay();
     timer = setInterval(function () { goToSlide(current + 1); }, 5000);
   }
 
@@ -93,8 +103,20 @@
     });
   });
 
-  const hero = document.querySelector('.hero');
+  var hero = document.querySelector('.hero');
   if (hero) {
+    var touchStartX = 0;
+    hero.addEventListener('touchstart', function (e) {
+      touchStartX = e.changedTouches[0].screenX;
+      stopAutoplay();
+    }, { passive: true });
+    hero.addEventListener('touchend', function (e) {
+      var diff = e.changedTouches[0].screenX - touchStartX;
+      if (Math.abs(diff) > 50) {
+        goToSlide(diff > 0 ? current - 1 : current + 1);
+      }
+      startAutoplay();
+    }, { passive: true });
     hero.addEventListener('mouseenter', stopAutoplay);
     hero.addEventListener('mouseleave', startAutoplay);
   }

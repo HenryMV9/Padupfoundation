@@ -86,6 +86,11 @@
 .stagger.revealed > *:nth-child(4) { transition-delay: 0.35s; }
 .stagger.revealed > *:nth-child(5) { transition-delay: 0.45s; }
 .stagger.revealed > *:nth-child(6) { transition-delay: 0.55s; }
+.stagger.revealed > *:nth-child(7) { transition-delay: 0.65s; }
+.stagger.revealed > *:nth-child(8) { transition-delay: 0.75s; }
+.stagger.revealed > *:nth-child(9) { transition-delay: 0.85s; }
+.stagger.revealed > *:nth-child(10) { transition-delay: 0.95s; }
+.stagger.revealed > *:nth-child(11) { transition-delay: 1.05s; }
 
 .stagger.revealed > * {
   opacity: 1;
