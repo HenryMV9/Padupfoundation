@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+import { resolve } from 'path';
 
 export default defineConfig({
   root: '.',
@@ -7,12 +8,12 @@ export default defineConfig({
     outDir: 'dist',
     rollupOptions: {
       input: {
-        main: 'index.html',
-        about: 'about.html',
-        gallery: 'gallery.html',
-        donate: 'donate.html',
-        'get-involved': 'get-involved.html',
-        contact: 'contact.html',
+        main: resolve(__dirname, 'index.html'),
+        about: resolve(__dirname, 'about.html'),
+        gallery: resolve(__dirname, 'gallery.html'),
+        donate: resolve(__dirname, 'donate.html'),
+        'get-involved': resolve(__dirname, 'get-involved.html'),
+        contact: resolve(__dirname, 'contact.html'),
       },
     },
   },
@@ -20,10 +21,5 @@ export default defineConfig({
     port: 3000,
     open: false,
   },
-  /* Treat the plain JS files as assets so Vite copies them
-     without trying to parse them as ES modules */
   assetsInclude: ['**/*.jpg', '**/*.jpeg', '**/*.png', '**/*.gif', '**/*.svg'],
-  optimizeDeps: {
-    exclude: [],
-  },
 });
