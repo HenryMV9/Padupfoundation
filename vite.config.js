@@ -10,6 +10,7 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'index.html'),
         about: resolve(__dirname, 'about.html'),
+        founder: resolve(__dirname, 'founder.html'),
         gallery: resolve(__dirname, 'gallery.html'),
         donate: resolve(__dirname, 'donate.html'),
         'get-involved': resolve(__dirname, 'get-involved.html'),

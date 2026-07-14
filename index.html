@@ -35,7 +35,9 @@
       <ul class="navbar-nav" role="list">
         <li><a href="index.html" class="nav-link">Home</a></li>
         <li><a href="about.html" class="nav-link">About</a></li>
+        <li><a href="founder.html" class="nav-link">Founder</a></li>
         <li><a href="gallery.html" class="nav-link">Gallery</a></li>
+        <li><a href="news.html" class="nav-link">News</a></li>
         <li><a href="donate.html" class="nav-link nav-donate">Donate</a></li>
         <li><a href="get-involved.html" class="nav-link">Get Involved</a></li>
         <li><a href="contact.html" class="nav-link">Contact</a></li>
@@ -286,74 +288,6 @@
     </div>
   </section>
 
-  <!-- ===== FOUNDER SECTION ===== -->
-  <section class="founder-section" id="founder" aria-labelledby="founder-heading">
-    <div class="container">
-      <div class="founder-grid">
-        <div class="founder-portrait reveal from-left">
-          <img src="images/founder/Founder's-Pfp.jpg" alt="Adaeze Nuelin, Founder of Pad Up Foundation" class="founder-portrait-img" loading="lazy" />
-          <div class="founder-portrait-badge">
-            <div class="founder-portrait-badge-icon"><i class="fas fa-seedling"></i></div>
-            <div class="founder-portrait-badge-text">
-              <strong>Adaeze Nuelin</strong>
-              <span>Founder &amp; Visionary</span>
-            </div>
-          </div>
-        </div>
-        <div class="founder-content reveal from-right">
-          <div class="badge">Meet the Founder</div>
-          <h2 id="founder-heading">The Heart Behind Pad Up Foundation</h2>
-          <p class="founder-bio">Adaeze Nuelin is a passionate advocate, author, and social entrepreneur dedicated to ending period poverty and empowering girls across underserved communities. Her journey began with a simple conviction: that no girl should ever have to miss school, sacrifice her dignity, or dim her potential because of a natural biological process.</p>
-          <p class="founder-bio">Through Pad Up Foundation, Adaeze has turned that conviction into action — leading outreach programs, delivering menstrual health education, and distributing sanitary products to thousands of girls. Her work bridges the gap between health, education, and gender equality, creating lasting social impact one community at a time.</p>
-          <p class="founder-bio">Adaeze believes that menstrual health is not just a health issue — it is a matter of human rights, dignity, and equal opportunity. Her mission is to break the silence surrounding menstruation, challenge cultural stigma, and build a future where every girl can pursue her dreams without interruption.</p>
-          <div class="founder-vision-card">
-            <h4><i class="fas fa-quote-left"></i> Vision Statement</h4>
-            <p>"I envision a world where a girl's period is never a barrier to her education, her confidence, or her future. Where every girl holds her head high, supported by a community that refuses to let her fall behind."</p>
-          </div>
-
-          <!-- Featured Book -->
-          <div class="founder-book">
-            <div class="founder-book-grid">
-              <img src="images/founder/Founders-Book-Cover..jpg" alt="Lineage of Whispers book cover" class="founder-book-cover" loading="lazy" />
-              <div>
-                <span class="founder-book-badge">Published Author</span>
-                <h3>Lineage of Whispers</h3>
-                <p>A powerful literary work that raises awareness about menstrual health, breaks the silence surrounding period poverty, and champions education, dignity, and social change. Through storytelling, Adaeze gives voice to the unspoken struggles and triumphs of girls who deserve to be heard.</p>
-                <a href="https://www.amazon.com/dp/B0H59X54M3" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
-                  <i class="fab fa-amazon"></i> Read on Amazon
-                </a>
-              </div>
-            </div>
-          </div>
-
-          <div style="display: flex; gap: var(--space-4); margin-top: var(--space-6); flex-wrap: wrap;">
-            <a href="donate.html" class="btn btn-primary"><i class="fas fa-heart"></i> Support Our Mission</a>
-            <a href="about.html" class="btn btn-outline">Learn More About Us</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== NEWS & UPDATES ===== -->
-  <section class="section" id="news" aria-labelledby="news-heading">
-    <div class="container">
-      <header class="section-header text-center reveal">
-        <div class="badge">Latest Updates</div>
-        <h2 id="news-heading">News &amp; Updates</h2>
-        <p>Stay informed about our latest outreach programs, community initiatives, and impact stories.</p>
-      </header>
-      <div class="news-grid stagger" id="news-grid" role="list">
-        <div class="news-empty" id="news-empty">
-          <i class="fas fa-newspaper"></i>
-          <p>News articles will appear here soon. Check back for updates!</p>
-        </div>
-      </div>
-      <div class="text-center reveal" style="margin-top: var(--space-10);">
-        <a href="news.html" class="btn btn-outline">View All Updates <i class="fas fa-arrow-right"></i></a>
-      </div>
-    </div>
-  </section>
 
   <!-- ===== NEWSLETTER SIGNUP ===== -->
   <section class="newsletter-section" aria-labelledby="newsletter-heading">
@@ -458,6 +392,35 @@
     </div>
   </footer>
 
+  <!-- ===== NEWSLETTER POPUP ===== -->
+  <div class="newsletter-popup-overlay" id="newsletter-popup-overlay" role="dialog" aria-modal="true" aria-labelledby="popup-heading">
+    <div class="newsletter-popup">
+      <button class="newsletter-popup-close" id="newsletter-popup-close" aria-label="Close popup">
+        <i class="fas fa-times"></i>
+      </button>
+      <div class="newsletter-popup-icon">
+        <i class="fas fa-envelope-open-text"></i>
+      </div>
+      <h2 id="popup-heading">Stay in the Loop!</h2>
+      <p>Subscribe to get inspiring stories, impact updates, and opportunities to make a difference delivered to your inbox.</p>
+      <form class="newsletter-popup-form" id="newsletter-popup-form" novalidate>
+        <div class="form-group">
+          <input type="text" id="popup-name" class="form-control" placeholder="Your first name" required autocomplete="given-name" />
+          <span class="error-msg" role="alert"></span>
+        </div>
+        <div class="form-group">
+          <input type="email" id="popup-email" class="form-control" placeholder="your@email.com" required autocomplete="email" />
+          <span class="error-msg" role="alert"></span>
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg" id="popup-submit" style="width: 100%; justify-content: center;">
+          <i class="fas fa-paper-plane"></i> Subscribe Now
+        </button>
+      </form>
+      <div class="newsletter-popup-feedback" id="popup-feedback" role="status" aria-live="polite"></div>
+      <p class="newsletter-popup-disclaimer">No spam, ever. Unsubscribe anytime.</p>
+    </div>
+  </div>
+
   <!-- ===== LIGHTBOX ===== -->
   <div class="lightbox" role="dialog" aria-modal="true" aria-label="Image viewer">
     <div class="lightbox-content">
@@ -487,8 +450,8 @@
   <script type="module" src="/js/app.js"></script>
   <script type="module" src="/js/main.js"></script>
   <script type="module" src="/js/gallery.js"></script>
-  <script type="module" src="/js/news.js"></script>
   <script type="module" src="/js/newsletter.js"></script>
+  <script type="module" src="/js/newsletter-popup.js"></script>
   <script src="https://checkout.flutterwave.com/v3.js" defer></script>
 </body>
 </html>
