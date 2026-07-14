@@ -14,6 +14,8 @@ export default defineConfig({
         donate: resolve(__dirname, 'donate.html'),
         'get-involved': resolve(__dirname, 'get-involved.html'),
         contact: resolve(__dirname, 'contact.html'),
+        news: resolve(__dirname, 'news.html'),
+        admin: resolve(__dirname, 'admin.html'),
       },
     },
   },

@@ -109,6 +109,9 @@
 
   refreshGalleryItems();
 
+  // Listen for dynamically added gallery items (from Supabase)
+  window.addEventListener('gallery:refresh', refreshGalleryItems);
+
   var filterBtns = document.querySelectorAll('.filter-btn');
   var galleryItems = document.querySelectorAll('[data-category]');
 

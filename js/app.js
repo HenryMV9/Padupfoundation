@@ -6,3 +6,4 @@
 
 import '../css/styles.css';
 import '../css/animations.css';
+import '../css/enhancements.css';

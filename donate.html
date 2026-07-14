@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="css/styles.css" />
   <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/enhancements.css" />
 </head>
 <body>
 
@@ -89,10 +90,22 @@
           <h2 id="donate-heading" style="margin-bottom: var(--space-2);">Make Your Donation</h2>
           <p style="margin-bottom: var(--space-8);">Choose an amount below or enter your own. All donations are processed securely via Flutterwave.</p>
 
+          <!-- Currency Selector -->
+          <div class="currency-selector-wrap">
+            <span class="currency-selector-label"><i class="fas fa-globe"></i> Currency:</span>
+            <select id="currency-selector" class="currency-selector" aria-label="Select donation currency">
+              <option value="NGN" data-symbol="&#8358;" selected>NGN — Nigerian Naira (&#8358;)</option>
+              <option value="USD" data-symbol="$">USD — US Dollar ($)</option>
+              <option value="GBP" data-symbol="&pound;">GBP — British Pound (&pound;)</option>
+              <option value="EUR" data-symbol="&euro;">EUR — Euro (&euro;)</option>
+              <option value="CAD" data-symbol="C$">CAD — Canadian Dollar (C$)</option>
+            </select>
+          </div>
+
           <!-- Amount Selection -->
           <div style="margin-bottom: var(--space-6);">
-            <label style="display: block; margin-bottom: var(--space-3); font-weight: 600; font-family: var(--font-heading); color: var(--gray-700);">Select Amount (₦)</label>
-            <div class="amount-grid">
+            <label style="display: block; margin-bottom: var(--space-3); font-weight: 600; font-family: var(--font-heading); color: var(--gray-700);" id="amount-label">Select Amount (₦)</label>
+            <div class="amount-grid" id="amount-grid">
               <button class="amount-btn" data-amount="2500">₦2,500</button>
               <button class="amount-btn selected" data-amount="5000">₦5,000</button>
               <button class="amount-btn" data-amount="10000">₦10,000</button>
@@ -101,7 +114,7 @@
               <button class="amount-btn" data-amount="100000">₦100,000</button>
             </div>
             <div class="form-group" style="margin-top: var(--space-3);">
-              <input type="number" id="custom-amount" class="form-control" placeholder="Or enter custom amount (₦)" min="100" aria-label="Custom donation amount in Naira" />
+              <input type="number" id="custom-amount" class="form-control" placeholder="Or enter custom amount (₦)" min="100" aria-label="Custom donation amount" />
             </div>
           </div>
 
@@ -367,6 +380,7 @@
   <script type="module" src="/js/app.js"></script>
   <script type="module" src="/js/main.js"></script>
   <script type="module" src="/js/forms.js"></script>
+  <script type="module" src="/js/donation.js"></script>
   <script src="https://checkout.flutterwave.com/v3.js" defer></script>
 </body>
 </html>

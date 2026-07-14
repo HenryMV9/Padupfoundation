@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Admin Dashboard — Pad Up Foundation</title>
+  <link rel="icon" type="image/jpeg" href="images/Padupfoundation-LOGO.jpg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/enhancements.css" />
+</head>
+<body class="admin-body">
+
+  <!-- ===== LOGIN VIEW (shown when not authenticated) ===== -->
+  <div id="admin-login-view" class="admin-login-page">
+    <div class="admin-login-card">
+      <div class="admin-login-logo">
+        <img src="images/Padupfoundation-LOGO.jpg" alt="Pad Up Foundation" />
+        <h1>Admin Dashboard</h1>
+        <p>Sign in to manage your platform</p>
+      </div>
+      <div class="admin-login-feedback" id="login-feedback" role="alert"></div>
+      <form id="admin-login-form" novalidate>
+        <div class="form-group">
+          <label for="admin-email">Email Address</label>
+          <input type="email" id="admin-email" class="form-control" placeholder="admin@padupfoundation.org" required autocomplete="email" />
+          <span class="error-msg" role="alert"></span>
+        </div>
+        <div class="form-group">
+          <label for="admin-password">Password</label>
+          <input type="password" id="admin-password" class="form-control" placeholder="Enter your password" required autocomplete="current-password" />
+          <span class="error-msg" role="alert"></span>
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg" id="login-btn" style="width: 100%; justify-content: center;">
+          <i class="fas fa-sign-in-alt"></i> Sign In
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== DASHBOARD VIEW (shown when authenticated) ===== -->
+  <div id="admin-dashboard-view" style="display: none;">
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar" id="admin-sidebar">
+        <div class="admin-sidebar-logo">
+          <img src="images/Padupfoundation-LOGO.jpg" alt="Pad Up Foundation" />
+          <div>
+            <span>Pad Up Foundation</span>
+            <small>Admin Panel</small>
+          </div>
+        </div>
+        <nav class="admin-nav">
+          <button class="admin-nav-item active" data-panel="overview">
+            <i class="fas fa-chart-line"></i> Overview
+          </button>
+          <button class="admin-nav-item" data-panel="donations">
+            <i class="fas fa-hand-holding-heart"></i> Donations
+          </button>
+          <button class="admin-nav-item" data-panel="news">
+            <i class="fas fa-newspaper"></i> News Articles
+          </button>
+          <button class="admin-nav-item" data-panel="gallery">
+            <i class="fas fa-images"></i> Gallery
+          </button>
+          <button class="admin-nav-item" data-panel="subscribers">
+            <i class="fas fa-users"></i> Subscribers
+          </button>
+        </nav>
+        <div class="admin-sidebar-footer">
+          <div class="admin-user-info" id="admin-user-email"></div>
+          <button class="admin-logout-btn" id="admin-logout-btn">
+            <i class="fas fa-sign-out-alt"></i> Sign Out
+          </button>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="admin-main">
+        <header class="admin-header">
+          <div>
+            <h1 id="panel-title">Dashboard Overview</h1>
+            <p id="panel-subtitle">Welcome back! Here's what's happening with your platform.</p>
+          </div>
+          <button class="admin-mobile-toggle" id="admin-mobile-toggle" aria-label="Toggle sidebar">
+            <i class="fas fa-bars"></i>
+          </button>
+        </header>
+
+        <!-- ===== OVERVIEW PANEL ===== -->
+        <section class="admin-panel active" id="panel-overview">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-card-icon donations"><i class="fas fa-hand-holding-heart"></i></div>
+              <div class="stat-card-value" id="stat-donations">0</div>
+              <div class="stat-card-label">Total Donations</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-icon subscribers"><i class="fas fa-users"></i></div>
+              <div class="stat-card-value" id="stat-subscribers">0</div>
+              <div class="stat-card-label">Newsletter Subscribers</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-icon gallery"><i class="fas fa-images"></i></div>
+              <div class="stat-card-value" id="stat-gallery">0</div>
+              <div class="stat-card-label">Gallery Images</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-icon news"><i class="fas fa-newspaper"></i></div>
+              <div class="stat-card-value" id="stat-news">0</div>
+              <div class="stat-card-label">News Articles</div>
+            </div>
+          </div>
+
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <h2>Recent Donations</h2>
+            </div>
+            <div class="admin-table-wrap">
+              <table class="admin-table">
+                <thead>
+                  <tr><th>Donor</th><th>Amount</th><th>Currency</th><th>Date</th></tr>
+                </thead>
+                <tbody id="overview-recent-donations">
+                  <tr><td colspan="4" class="admin-empty-state">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== DONATIONS PANEL ===== -->
+        <section class="admin-panel" id="panel-donations">
+          <div class="admin-summary-row">
+            <div class="admin-summary-card">
+              <div class="stat-card-value" id="donations-total">0</div>
+              <div class="stat-card-label">Total Donations Received</div>
+            </div>
+            <div class="admin-summary-card">
+              <div class="stat-card-value" id="donors-total">0</div>
+              <div class="stat-card-label">Total Number of Donors</div>
+            </div>
+          </div>
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <h2>All Donations</h2>
+            </div>
+            <div class="admin-search-bar">
+              <input type="text" class="admin-search-input" id="donations-search" placeholder="Search by name or email..." />
+              <select class="admin-filter-select" id="donations-currency-filter">
+                <option value="">All Currencies</option>
+                <option value="NGN">NGN</option>
+                <option value="USD">USD</option>
+                <option value="GBP">GBP</option>
+                <option value="EUR">EUR</option>
+                <option value="CAD">CAD</option>
+              </select>
+              <select class="admin-filter-select" id="donations-sort">
+                <option value="recent">Most Recent</option>
+                <option value="highest">Highest Amount</option>
+                <option value="lowest">Lowest Amount</option>
+              </select>
+            </div>
+            <div class="admin-table-wrap">
+              <table class="admin-table">
+                <thead>
+                  <tr><th>Donor Name</th><th>Email</th><th>Amount</th><th>Currency</th><th>Status</th><th>Date</th></tr>
+                </thead>
+                <tbody id="donations-table-body">
+                  <tr><td colspan="6" class="admin-empty-state">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== NEWS PANEL ===== -->
+        <section class="admin-panel" id="panel-news">
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <h2>News Articles</h2>
+              <button class="btn btn-primary btn-sm" id="news-add-btn"><i class="fas fa-plus"></i> Add Article</button>
+            </div>
+            <div class="admin-table-wrap">
+              <table class="admin-table">
+                <thead>
+                  <tr><th>Title</th><th>Status</th><th>Published Date</th><th>Actions</th></tr>
+                </thead>
+                <tbody id="news-table-body">
+                  <tr><td colspan="4" class="admin-empty-state">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== GALLERY PANEL ===== -->
+        <section class="admin-panel" id="panel-gallery">
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <h2>Gallery Management</h2>
+              <button class="btn btn-primary btn-sm" id="gallery-upload-btn"><i class="fas fa-upload"></i> Upload Image</button>
+            </div>
+            <div class="admin-gallery-grid" id="admin-gallery-grid">
+              <div class="admin-empty-state" style="grid-column: 1/-1;">Loading gallery...</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== SUBSCRIBERS PANEL ===== -->
+        <section class="admin-panel" id="panel-subscribers">
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <h2>Newsletter Subscribers</h2>
+              <button class="btn btn-outline btn-sm" id="export-csv-btn"><i class="fas fa-download"></i> Export CSV</button>
+            </div>
+            <div class="admin-search-bar">
+              <input type="text" class="admin-search-input" id="subscribers-search" placeholder="Search by name or email..." />
+            </div>
+            <div class="admin-table-wrap">
+              <table class="admin-table">
+                <thead>
+                  <tr><th>First Name</th><th>Email</th><th>Date Joined</th></tr>
+                </thead>
+                <tbody id="subscribers-table-body">
+                  <tr><td colspan="3" class="admin-empty-state">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- ===== NEWS EDIT MODAL ===== -->
+  <div class="admin-modal-overlay" id="news-modal">
+    <div class="admin-modal">
+      <div class="admin-modal-header">
+        <h3 id="news-modal-title">Add Article</h3>
+        <button class="admin-modal-close" data-close-modal="news-modal"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="admin-modal-body">
+        <form id="news-form" novalidate>
+          <input type="hidden" id="news-id" />
+          <div class="form-group">
+            <label for="news-title-input">Title <span class="required">*</span></label>
+            <input type="text" id="news-title-input" class="form-control" required />
+          </div>
+          <div class="form-group">
+            <label for="news-summary-input">Summary <span class="required">*</span></label>
+            <textarea id="news-summary-input" class="form-control" rows="2" required placeholder="Short summary for the news card"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="news-content-input">Content <span class="required">*</span></label>
+            <textarea id="news-content-input" class="form-control" rows="6" required placeholder="Full article content (HTML supported)"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="news-image-url">Featured Image URL</label>
+            <input type="url" id="news-image-url" class="form-control" placeholder="https://... (optional)" />
+          </div>
+          <div class="form-group">
+            <label for="news-status-input">Status</label>
+            <select id="news-status-input" class="form-control">
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+            </select>
+          </div>
+          <div class="admin-login-feedback" id="news-form-feedback" role="alert"></div>
+        </form>
+      </div>
+      <div class="admin-modal-footer">
+        <button class="btn btn-outline btn-sm" data-close-modal="news-modal">Cancel</button>
+        <button class="btn btn-primary btn-sm" id="news-save-btn"><i class="fas fa-save"></i> Save Article</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== GALLERY UPLOAD MODAL ===== -->
+  <div class="admin-modal-overlay" id="gallery-modal">
+    <div class="admin-modal">
+      <div class="admin-modal-header">
+        <h3>Upload Gallery Image</h3>
+        <button class="admin-modal-close" data-close-modal="gallery-modal"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="admin-modal-body">
+        <form id="gallery-form" novalidate>
+          <div class="form-group">
+            <label>Image File</label>
+            <div class="admin-upload-area" id="gallery-drop-area">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <p>Click to browse or drag and drop</p>
+              <span>PNG, JPG, WEBP — max 5MB</span>
+              <input type="file" id="gallery-file-input" accept="image/*" style="display: none;" />
+            </div>
+            <img id="gallery-preview" class="admin-image-preview" style="display: none;" alt="Preview" />
+          </div>
+          <div class="form-group">
+            <label for="gallery-caption">Caption</label>
+            <input type="text" id="gallery-caption" class="form-control" placeholder="Image caption (optional)" />
+          </div>
+          <div class="form-group">
+            <label for="gallery-category">Category <span class="required">*</span></label>
+            <select id="gallery-category" class="form-control" required>
+              <option value="outreach">Outreach</option>
+              <option value="education">Education</option>
+              <option value="community">Community</option>
+              <option value="events">Events</option>
+            </select>
+          </div>
+          <div class="admin-login-feedback" id="gallery-form-feedback" role="alert"></div>
+        </form>
+      </div>
+      <div class="admin-modal-footer">
+        <button class="btn btn-outline btn-sm" data-close-modal="gallery-modal">Cancel</button>
+        <button class="btn btn-primary btn-sm" id="gallery-upload-confirm"><i class="fas fa-upload"></i> Upload</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/js/admin.js"></script>
+</body>
+</html>
