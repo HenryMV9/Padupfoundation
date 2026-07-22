@@ -84,7 +84,7 @@
   <!-- ===== DONATION FORM ===== -->
   <section class="section" aria-labelledby="donate-heading">
     <div class="container">
-      <div class="donate-grid">
+      <div class="donate-grid reveal">
 
         <!-- Form -->
         <div class="donation-form-card reveal from-left">
@@ -352,8 +352,8 @@
       <div class="footer-bottom">
         <p>&copy; 2026 Pad Up Foundation. All rights reserved.</p>
         <div class="footer-bottom-links">
-          <a href="#">Privacy Policy</a>
-          <a href="#">Terms of Use</a>
+          <a href="privacy.html">Privacy Policy</a>
+          <a href="terms.html">Terms &amp; Conditions</a>
         </div>
       </div>
     </div>
@@ -364,7 +364,7 @@
     width: 48px; height: 48px; border-radius: 50%;
     background: var(--gradient-primary); color: var(--white);
     display: flex; align-items: center; justify-content: center;
-    box-shadow: var(--shadow-pink); cursor: pointer; border: none;
+    box-shadow: var(--shadow-accent); cursor: pointer; border: none;
     font-size: 1rem; opacity: 0; transform: translateY(20px);
     transition: all var(--transition-base); pointer-events: none;">
     <i class="fas fa-arrow-up"></i>
@@ -384,5 +384,6 @@
   <script type="module" src="/js/forms.js"></script>
   <script type="module" src="/js/donation.js"></script>
   <script src="https://checkout.flutterwave.com/v3.js" defer></script>
+<script type="module" src="/js/cursor.js"></script>
 </body>
 </html>

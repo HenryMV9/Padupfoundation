@@ -1466,3 +1466,305 @@
     padding: var(--space-4);
   }
 }
+
+/* ============================================================
+   LEGAL PAGES (Privacy Policy & Terms & Conditions)
+   ============================================================ */
+.legal-document {
+  max-width: 800px;
+  margin: 0 auto;
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  padding: var(--space-12) var(--space-10);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--gray-200);
+}
+
+.legal-document-title {
+  font-size: clamp(1.75rem, 3.5vw, 2.25rem);
+  color: var(--primary);
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-5);
+  border-bottom: 3px solid var(--accent);
+  display: inline-block;
+}
+
+.legal-intro {
+  font-size: 1.0625rem;
+  color: var(--gray-700);
+  margin-bottom: var(--space-5);
+  line-height: 1.8;
+}
+
+.legal-section {
+  margin-bottom: var(--space-8);
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.legal-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.legal-section-heading {
+  font-size: 1.25rem;
+  color: var(--primary);
+  margin-bottom: var(--space-4);
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+.legal-section-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: var(--gradient-accent);
+  color: var(--white);
+  font-size: 0.875rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.legal-section p {
+  margin-bottom: var(--space-3);
+  font-size: 1rem;
+  line-height: 1.8;
+  color: var(--gray-600);
+}
+
+.legal-section p:last-child {
+  margin-bottom: 0;
+}
+
+.legal-list {
+  list-style: none;
+  padding-left: 0;
+  margin: var(--space-4) 0;
+}
+
+.legal-list li {
+  position: relative;
+  padding-left: var(--space-6);
+  margin-bottom: var(--space-3);
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--gray-600);
+}
+
+.legal-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.6em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.legal-contact-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 1.0625rem;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  background: var(--gradient-primary-soft);
+  border: 1px solid rgba(27,58,92,0.1);
+  transition: all var(--transition-base);
+}
+
+.legal-contact-link:hover {
+  background: var(--primary);
+  color: var(--white);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.legal-contact-link i {
+  font-size: 0.875rem;
+}
+
+@media (max-width: 640px) {
+  .legal-document {
+    padding: var(--space-8) var(--space-5);
+  }
+
+  .legal-section-heading {
+    font-size: 1.125rem;
+  }
+
+  .legal-section p,
+  .legal-list li {
+    font-size: 0.9375rem;
+  }
+}
+
+/* ============================================================
+   CUSTOM CURSOR
+   ============================================================ */
+.cursor-dot,
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  mix-blend-mode: difference;
+}
+
+.cursor-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  transform: translate(-50%, -50%);
+  transition: opacity 0.2s ease;
+}
+
+.cursor-ring {
+  width: 36px;
+  height: 36px;
+  border: 2px solid var(--accent);
+  opacity: 0.5;
+  transform: translate(-50%, -50%);
+  transition: width 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+              height 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+              opacity 0.25s ease,
+              border-color 0.25s ease;
+}
+
+.cursor-ring.hovering {
+  width: 56px;
+  height: 56px;
+  opacity: 0.8;
+  border-color: var(--primary);
+}
+
+.cursor-dot.hovering {
+  transform: translate(-50%, -50%) scale(0.5);
+}
+
+.cursor-hidden {
+  cursor: none;
+}
+
+@media (hover: none), (max-width: 1024px) {
+  .cursor-dot,
+  .cursor-ring {
+    display: none !important;
+  }
+}
+
+/* ============================================================
+   PREMIUM SCROLL ANIMATION ENHANCEMENTS
+   ============================================================ */
+.reveal.fade-in {
+  opacity: 0;
+  transform: none;
+}
+
+.reveal.slide-up {
+  opacity: 0;
+  transform: translateY(40px);
+}
+
+.reveal.slide-left {
+  opacity: 0;
+  transform: translateX(-40px);
+}
+
+.reveal.slide-right {
+  opacity: 0;
+  transform: translateX(40px);
+}
+
+.reveal.zoom-in {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+.reveal.revealed.fade-in,
+.reveal.revealed.slide-up,
+.reveal.revealed.slide-left,
+.reveal.revealed.slide-right,
+.reveal.revealed.zoom-in {
+  opacity: 1;
+  transform: translate(0) scale(1);
+}
+
+/* Image reveal with clip-path */
+.img-reveal {
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.img-reveal.revealed {
+  clip-path: inset(0 0 0 0);
+}
+
+/* Smooth section transitions */
+.section {
+  transition: background-color 0.4s ease;
+}
+
+/* Premium button hover ripple */
+.btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  transform: translate(-50%, -50%);
+  transition: width 0.5s ease, height 0.5s ease;
+}
+
+.btn:hover::after {
+  width: 300px;
+  height: 300px;
+}
+
+/* Elegant card hover glow */
+.mission-card,
+.value-card,
+.testimonial-card,
+.involvement-card,
+.news-card {
+  position: relative;
+}
+
+.mission-card:hover,
+.value-card:hover,
+.testimonial-card:hover {
+  box-shadow: 0 12px 40px rgba(27, 58, 92, 0.12);
+}
+
+/* Form field premium focus */
+.form-control:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 3px rgba(27, 58, 92, 0.1), 0 4px 12px rgba(27, 58, 92, 0.08);
+}
+
+/* Smooth page transition on load */
+.page-enter {
+  animation: fadeIn 0.5s ease both;
+}
+
+/* Stagger delay utility */
+.stagger.revealed > *:nth-child(12) { transition-delay: 0.82s; }

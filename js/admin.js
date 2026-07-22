@@ -92,7 +92,22 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
         showDashboard(data.user);
         loginForm.reset();
       } catch (err) {
-        showLoginFeedback('error-state', 'Invalid credentials. Please check your email and password.');
+        var msg = err && err.message ? err.message : '';
+        var display;
+        if (msg.indexOf('Invalid login credentials') !== -1) {
+          display = 'Invalid email or password. Please verify your credentials and try again.';
+        } else if (msg.indexOf('Email not confirmed') !== -1) {
+          display = 'Your email has not been confirmed. Please contact your administrator.';
+        } else if (msg.indexOf('over_request_rate_limit') !== -1 || msg.indexOf('rate limit') !== -1) {
+          display = 'Too many login attempts. Please wait a moment and try again.';
+        } else if (msg.indexOf('Failed to fetch') !== -1 || msg.indexOf('NetworkError') !== -1) {
+          display = 'Network error. Please check your internet connection and try again.';
+        } else if (msg) {
+          display = 'Login failed: ' + msg;
+        } else {
+          display = 'Invalid credentials. Please check your email and password.';
+        }
+        showLoginFeedback('error-state', display);
       } finally {
         loginBtn.innerHTML = originalText;
         loginBtn.disabled = false;
