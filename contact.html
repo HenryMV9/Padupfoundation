@@ -70,6 +70,13 @@
 
           <div class="contact-info-items">
             <div class="contact-info-item">
+              <div class="contact-info-icon" aria-hidden="true"><i class="fas fa-map-marker-alt"></i></div>
+              <div>
+                <span>Address</span>
+                <p style="margin: 0; line-height: 1.6;">No 1 Location Road<br>Orazi, Port Harcourt</p>
+              </div>
+            </div>
+            <div class="contact-info-item">
               <div class="contact-info-icon" aria-hidden="true"><i class="fas fa-phone"></i></div>
               <div>
                 <span>Phone</span>
@@ -175,7 +182,25 @@
   <!-- ===== QUICK CONTACT CARDS ===== -->
   <section class="section-sm" style="background: var(--gray-50);" aria-label="Quick contact options">
     <div class="container">
-      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-6);" class="stagger">
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-6);" class="stagger">
+
+        <div style="
+          display: flex; flex-direction: column; align-items: center; text-align: center;
+          background: var(--white); border-radius: var(--radius-xl); padding: var(--space-8);
+          box-shadow: var(--shadow-md); border: 1px solid var(--gray-100);
+          transition: all var(--transition-base); color: inherit;"
+          class="hover-lift">
+          <div style="
+            width: 64px; height: 64px; border-radius: 50%;
+            background: var(--gradient-primary);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; color: white; margin-bottom: var(--space-5);">
+            <i class="fas fa-map-marker-alt"></i>
+          </div>
+          <h4 style="color: var(--primary); margin-bottom: var(--space-2);">Visit Us</h4>
+          <p style="margin-bottom: var(--space-3);">Come see our work in person</p>
+          <strong style="color: var(--accent); font-family: var(--font-heading); font-size: 0.875rem;">No 1 Location Road<br>Orazi, Port Harcourt</strong>
+        </div>
 
         <a href="tel:+2347063233363" style="
           display: flex; flex-direction: column; align-items: center; text-align: center;
@@ -272,6 +297,13 @@
         <address style="font-style: normal;">
           <h3 class="footer-heading">Contact Us</h3>
           <div class="footer-contact-item">
+            <div class="footer-contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+            <div>
+              <span style="display: block; color: var(--gray-500); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">Address</span>
+              <span style="display: block; color: var(--gray-700);">No 1 Location Road<br>Orazi, Port Harcourt</span>
+            </div>
+          </div>
+          <div class="footer-contact-item">
             <div class="footer-contact-icon"><i class="fas fa-phone"></i></div>
             <div>
               <span style="display: block; color: var(--gray-500); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">Phone</span>
@@ -319,7 +351,7 @@
     .back-to-top:hover { transform: translateY(-4px) !important; box-shadow: 0 12px 32px rgba(200,16,46,0.35) !important; }
     @media (max-width: 700px) {
       .contact-grid { grid-template-columns: 1fr !important; }
-      section [style*="grid-template-columns: repeat(3, 1fr)"] {
+      section [style*="grid-template-columns: repeat(4, 1fr)"] {
         grid-template-columns: 1fr !important;
       }
     }
