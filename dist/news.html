@@ -3,21 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Privacy Policy for Pad Up Foundation — how we collect, use, and safeguard your information when you visit our website and make a donation." />
-  <meta property="og:title" content="Privacy Policy — Pad Up Foundation" />
-  <meta property="og:description" content="We are committed to protecting your privacy. Learn how we handle your information." />
-  <meta property="og:image" content="images/hero/Padupfoundation-3.jpg" />
-  <meta property="og:type" content="website" />
-  <meta name="robots" content="index, follow" />
-  <title>Privacy Policy — Pad Up Foundation</title>
+  <meta name="description" content="Latest news, updates, and impact stories from Pad Up Foundation." />
+  <meta property="og:title" content="News & Updates — Pad Up Foundation" />
+  <meta property="og:description" content="Stay informed about our latest outreach programs and community initiatives." />
+  <title>News & Updates — Pad Up Foundation</title>
   <link rel="icon" type="image/jpeg" href="images/Padupfoundation-LOGO.jpg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/styles.css" />
-  <link rel="stylesheet" href="css/animations.css" />
-  <link rel="stylesheet" href="css/enhancements.css" />
+  <script type="module" crossorigin src="/assets/news-ChUga2o6.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/enhancements-OXuf2Fqc.js">
+  <link rel="modulepreload" crossorigin href="/assets/cursor-By3-8O7z.js">
+  <link rel="modulepreload" crossorigin href="/assets/supabase-client-CDcWUE7U.js">
+  <link rel="stylesheet" crossorigin href="/assets/enhancements-BEu72xaN.css">
 </head>
 <body>
 
@@ -48,58 +47,46 @@
   </nav>
 
   <!-- ===== PAGE HERO ===== -->
-  <section class="page-hero" aria-label="Privacy Policy hero">
+  <section class="page-hero" aria-label="News page hero">
     <div class="page-hero-bg">
-      <img src="images/hero/Padupfoundation-3.jpg" alt="Students in a classroom learning session" loading="eager" />
+      <img src="images/hero/Padupfoundation-4.jpg" alt="Community outreach program" loading="eager" />
     </div>
     <div class="page-hero-overlay" aria-hidden="true"></div>
     <div class="page-hero-content">
-      <div class="badge">Legal</div>
-      <h1>Privacy Policy</h1>
-      <p>Your privacy matters to us. Here's how we handle your information with care and transparency.</p>
+      <div class="badge">Latest Updates</div>
+      <h1>News &amp; Updates</h1>
+      <p>Stay informed about our latest outreach programs, community initiatives, and impact stories.</p>
     </div>
   </section>
 
-  <!-- ===== LEGAL CONTENT ===== -->
-  <section class="section" aria-labelledby="privacy-heading">
+  <!-- ===== NEWS LISTING ===== -->
+  <section class="section" id="news-listing" aria-labelledby="news-listing-heading">
     <div class="container">
-      <div class="legal-document reveal">
-        <h2 id="privacy-heading" class="legal-document-title">Privacy Policy</h2>
-        <p class="legal-intro">At PADUP Foundation, we are committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you visit our website and make a donation.</p>
-
-        <div class="legal-section">
-          <h3 class="legal-section-heading"><span class="legal-section-number">1.</span> Information We Collect</h3>
-          <p>When you donate or contact us, we collect personal information such as your name, email address, and billing details.</p>
+      <header class="section-header text-center reveal">
+        <h2 id="news-listing-heading">Recent Stories &amp; Updates</h2>
+        <p>Discover how your support is making a real difference in communities across Nigeria.</p>
+      </header>
+      <div class="news-grid stagger" id="news-grid-full" role="list">
+        <div class="news-empty" id="news-empty-full">
+          <i class="fas fa-newspaper"></i>
+          <p>News articles will appear here soon. Check back for updates!</p>
         </div>
+      </div>
+    </div>
+  </section>
 
-        <div class="legal-section">
-          <h3 class="legal-section-heading"><span class="legal-section-number">2.</span> Payment Processing Security</h3>
-          <p>All financial transactions are securely processed through our authorized payment gateway, Flutterwave.</p>
-          <p>PADUP Foundation does not store, view, or retain your credit/debit card numbers or bank account login credentials on our servers.</p>
-          <p>Flutterwave securely encrypts and processes all payment data in accordance with internationally recognized PCI-DSS security standards.</p>
+  <!-- ===== NEWS DETAIL (hidden, shown via ?id= param) ===== -->
+  <section class="section" id="news-detail-section" style="display: none;">
+    <div class="container">
+      <div class="news-detail-content">
+        <a href="news.html" class="btn btn-outline btn-sm" style="margin-bottom: var(--space-6);"><i class="fas fa-arrow-left"></i> Back to All News</a>
+        <img loading="lazy" id="news-detail-image" class="news-detail-hero" alt="" />
+        <h1 id="news-detail-title" class="news-detail-title"></h1>
+        <div class="news-detail-meta">
+          <span><i class="far fa-calendar"></i> <span id="news-detail-date"></span></span>
         </div>
-
-        <div class="legal-section">
-          <h3 class="legal-section-heading"><span class="legal-section-number">3.</span> How We Use Your Information</h3>
-          <p>We use your information solely to:</p>
-          <ul class="legal-list">
-            <li>Process voluntary donations</li>
-            <li>Issue electronic donation receipts</li>
-            <li>Share updates about PADUP Foundation's projects and community impact</li>
-            <li>Comply with applicable financial regulations and anti-money laundering requirements in Nigeria</li>
-          </ul>
-        </div>
-
-        <div class="legal-section">
-          <h3 class="legal-section-heading"><span class="legal-section-number">4.</span> Data Sharing</h3>
-          <p>We do not sell, rent, exchange, or disclose your personal information to third-party marketers or unrelated organizations.</p>
-        </div>
-
-        <div class="legal-section">
-          <h3 class="legal-section-heading"><span class="legal-section-number">5.</span> Contact Us</h3>
-          <p>If you have any questions regarding this Privacy Policy or how we process your data, please contact us at:</p>
-          <p><a href="mailto:info@padupfoundation.org" class="legal-contact-link"><i class="fas fa-envelope"></i> info@padupfoundation.org</a></p>
-        </div>
+        <div id="news-detail-body" class="news-detail-body"></div>
+        <a href="news.html" class="btn btn-outline" style="margin-top: var(--space-8);"><i class="fas fa-arrow-left"></i> Back to All News</a>
       </div>
     </div>
   </section>
@@ -134,6 +121,7 @@
           <ul class="footer-links">
             <li><a href="get-involved.html#volunteer"><i class="fas fa-chevron-right fa-xs"></i> Volunteer</a></li>
             <li><a href="get-involved.html#partner"><i class="fas fa-chevron-right fa-xs"></i> Partner With Us</a></li>
+            <li><a href="get-involved.html#sponsor"><i class="fas fa-chevron-right fa-xs"></i> Sponsorship</a></li>
             <li><a href="donate.html"><i class="fas fa-chevron-right fa-xs"></i> Make a Donation</a></li>
           </ul>
         </div>
@@ -180,8 +168,5 @@
     .back-to-top:hover { transform: translateY(-4px) !important; box-shadow: 0 12px 32px rgba(200,16,46,0.35) !important; }
   </style>
 
-  <script type="module" src="/js/app.js"></script>
-  <script type="module" src="/js/main.js"></script>
-<script type="module" src="/js/cursor.js"></script>
 </body>
 </html>
