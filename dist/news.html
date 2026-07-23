@@ -3,20 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Explore Pad Up Foundation's gallery — real moments from outreach programs, school visits, and community initiatives across Nigeria." />
-  <meta property="og:title" content="Gallery — Pad Up Foundation" />
-  <meta property="og:description" content="Real moments from our outreach programs. Every photograph tells the story of a girl whose future is brighter." />
-  <meta property="og:image" content="images/hero/Padupfoundation-4.jpg" />
-  <title>Gallery — Pad Up Foundation</title>
+  <meta name="description" content="Latest news, updates, and impact stories from Pad Up Foundation." />
+  <meta property="og:title" content="News & Updates — Pad Up Foundation" />
+  <meta property="og:description" content="Stay informed about our latest outreach programs and community initiatives." />
+  <title>News & Updates — Pad Up Foundation</title>
   <link rel="icon" type="image/jpeg" href="images/Padupfoundation-LOGO.jpg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <script type="module" crossorigin src="/assets/gallery-GubYw_25.js"></script>
+  <script type="module" crossorigin src="/assets/news-ChUga2o6.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/enhancements-OXuf2Fqc.js">
   <link rel="modulepreload" crossorigin href="/assets/cursor-By3-8O7z.js">
-  <link rel="modulepreload" crossorigin href="/assets/gallery-Wloo2J9S.js">
   <link rel="modulepreload" crossorigin href="/assets/supabase-client-CDcWUE7U.js">
   <link rel="stylesheet" crossorigin href="/assets/enhancements-BEu72xaN.css">
 </head>
@@ -49,90 +47,46 @@
   </nav>
 
   <!-- ===== PAGE HERO ===== -->
-  <section class="page-hero" aria-label="Gallery page hero">
+  <section class="page-hero" aria-label="News page hero">
     <div class="page-hero-bg">
-      <img src="images/hero/Padupfoundation-4.jpg" alt="Girls celebrating at outreach" loading="eager" />
+      <img src="images/hero/Padupfoundation-4.jpg" alt="Community outreach program" loading="eager" />
     </div>
     <div class="page-hero-overlay" aria-hidden="true"></div>
     <div class="page-hero-content">
-      <div class="badge">Our Work in Pictures</div>
-      <h1>Gallery</h1>
-      <p>Real moments from our outreach programs, each photograph tells the story of a girl whose future is brighter because of your support.</p>
+      <div class="badge">Latest Updates</div>
+      <h1>News &amp; Updates</h1>
+      <p>Stay informed about our latest outreach programs, community initiatives, and impact stories.</p>
     </div>
   </section>
 
-  <!-- ===== GALLERY ===== -->
-  <section class="section" aria-labelledby="gallery-main-heading">
+  <!-- ===== NEWS LISTING ===== -->
+  <section class="section" id="news-listing" aria-labelledby="news-listing-heading">
     <div class="container">
       <header class="section-header text-center reveal">
-        <div class="badge">Stories Behind Every Smile</div>
-        <h2 id="gallery-main-heading">Moments of Impact</h2>
-        <p>Browse photos from our school visits, community outreach events, and awareness programs.</p>
+        <h2 id="news-listing-heading">Recent Stories &amp; Updates</h2>
+        <p>Discover how your support is making a real difference in communities across Nigeria.</p>
       </header>
-
-      <!-- Filter Bar -->
-      <div class="gallery-filter-bar reveal" role="group" aria-label="Filter gallery by category">
-        <button class="filter-btn active" data-filter="all" aria-pressed="true">All</button>
-        <button class="filter-btn" data-filter="outreach" aria-pressed="false">Outreach Programs</button>
-        <button class="filter-btn" data-filter="education" aria-pressed="false">Education Sessions</button>
-        <button class="filter-btn" data-filter="community" aria-pressed="false">Community Events</button>
-      </div>
-
-      <!-- Mobile hint -->
-      <div class="gallery-mobile-hint">
-        <i class="fas fa-hand-pointer"></i> Tap any photo to browse full-screen
-      </div>
-
-      <!-- Gallery Grid -->
-      <div class="masonry-grid stagger reveal" id="masonry-grid" role="list" aria-label="Photo gallery">
-        <div class="masonry-item reveal" data-category="outreach" data-lightbox="images/hero/Padupfoundation-4.jpg" role="listitem" tabindex="0" aria-label="View: Girls celebrating at outreach">
-          <img src="images/hero/Padupfoundation-4.jpg" alt="Girls celebrating as they receive sanitary pads" loading="lazy" />
-          <div class="masonry-item-overlay"><i class="fas fa-expand" aria-hidden="true"></i></div>
-        </div>
-
-        <div class="masonry-item reveal" data-category="education" data-lightbox="images/hero/Padupfoundation-3.jpg" role="listitem" tabindex="0" aria-label="View: Classroom education session">
-          <img src="images/hero/Padupfoundation-3.jpg" alt="Student presenting during menstrual health class" loading="lazy" />
-          <div class="masonry-item-overlay"><i class="fas fa-expand" aria-hidden="true"></i></div>
-        </div>
-
-        <div class="masonry-item reveal" data-category="community" data-lightbox="images/outreach/Padupfoundation-2.jpg" role="listitem" tabindex="0" aria-label="View: Community awareness event">
-          <img src="images/outreach/Padupfoundation-2.jpg" alt="Students holding awareness signs at community event" loading="lazy" />
-          <div class="masonry-item-overlay"><i class="fas fa-expand" aria-hidden="true"></i></div>
-        </div>
-
-        <div class="masonry-item reveal" data-category="outreach" data-lightbox="images/gallery/Padupfoundation-1.jpg" role="listitem" tabindex="0" aria-label="View: Volunteer sharing pads">
-          <img src="images/gallery/Padupfoundation-1.jpg" alt="Volunteer sharing sanitary products with students" loading="lazy" />
-          <div class="masonry-item-overlay"><i class="fas fa-expand" aria-hidden="true"></i></div>
-        </div>
-
-        <div class="masonry-item reveal" data-category="community" data-lightbox="images/gallery/Padupfoundation-5.jpg" role="listitem" tabindex="0" aria-label="View: Students celebrating with donated pads">
-          <img src="images/gallery/Padupfoundation-5.jpg" alt="Students joyfully celebrating after receiving sanitary products" loading="lazy" />
-          <div class="masonry-item-overlay"><i class="fas fa-expand" aria-hidden="true"></i></div>
-        </div>
-
-        <div class="masonry-item reveal" data-category="outreach" data-lightbox="images/gallery/Padupfoundation-6.jpg" role="listitem" tabindex="0" aria-label="View: Students holding awareness signs">
-          <img src="images/gallery/Padupfoundation-6.jpg" alt="Students holding Donate a Pad and No More Stigma awareness signs" loading="lazy" />
-          <div class="masonry-item-overlay"><i class="fas fa-expand" aria-hidden="true"></i></div>
-        </div>
-
-        <div class="masonry-item reveal" data-category="outreach" data-lightbox="images/gallery/Padupfoundation-7.jpg" role="listitem" tabindex="0" aria-label="View: Volunteer with school children">
-          <img src="images/gallery/Padupfoundation-7.jpg" alt="Pad Up Foundation volunteer with school children during outreach" loading="lazy" />
-          <div class="masonry-item-overlay"><i class="fas fa-expand" aria-hidden="true"></i></div>
+      <div class="news-grid stagger" id="news-grid-full" role="list">
+        <div class="news-empty" id="news-empty-full">
+          <i class="fas fa-newspaper"></i>
+          <p>News articles will appear here soon. Check back for updates!</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ===== GALLERY CTA ===== -->
-  <section class="donation-cta" aria-labelledby="gallery-cta-heading">
-    <div class="container donation-cta-content">
-      <div class="reveal">
-        <div class="badge" style="background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.9); border: 1px solid rgba(255,255,255,0.3);">Be Part of the Story</div>
-        <h2 id="gallery-cta-heading">Help Us Create More Moments Like These.</h2>
-        <p>Every donation funds another outreach, another classroom visit, another girl who gets to stay in school. Your support makes these smiles possible.</p>
-        <a href="donate.html" class="btn btn-white btn-lg btn-glow">
-          <i class="fas fa-heart"></i> Donate Now
-        </a>
+  <!-- ===== NEWS DETAIL (hidden, shown via ?id= param) ===== -->
+  <section class="section" id="news-detail-section" style="display: none;">
+    <div class="container">
+      <div class="news-detail-content">
+        <a href="news.html" class="btn btn-outline btn-sm" style="margin-bottom: var(--space-6);"><i class="fas fa-arrow-left"></i> Back to All News</a>
+        <img loading="lazy" id="news-detail-image" class="news-detail-hero" alt="" />
+        <h1 id="news-detail-title" class="news-detail-title"></h1>
+        <div class="news-detail-meta">
+          <span><i class="far fa-calendar"></i> <span id="news-detail-date"></span></span>
+        </div>
+        <div id="news-detail-body" class="news-detail-body"></div>
+        <a href="news.html" class="btn btn-outline" style="margin-top: var(--space-8);"><i class="fas fa-arrow-left"></i> Back to All News</a>
       </div>
     </div>
   </section>
@@ -167,6 +121,7 @@
           <ul class="footer-links">
             <li><a href="get-involved.html#volunteer"><i class="fas fa-chevron-right fa-xs"></i> Volunteer</a></li>
             <li><a href="get-involved.html#partner"><i class="fas fa-chevron-right fa-xs"></i> Partner With Us</a></li>
+            <li><a href="get-involved.html#sponsor"><i class="fas fa-chevron-right fa-xs"></i> Sponsorship</a></li>
             <li><a href="donate.html"><i class="fas fa-chevron-right fa-xs"></i> Make a Donation</a></li>
           </ul>
         </div>
@@ -197,16 +152,6 @@
       </div>
     </div>
   </footer>
-
-  <!-- ===== LIGHTBOX ===== -->
-  <div class="lightbox" role="dialog" aria-modal="true" aria-label="Image viewer">
-    <div class="lightbox-content">
-      <button class="lightbox-close" aria-label="Close image viewer"><i class="fas fa-times"></i></button>
-      <button class="lightbox-nav prev" aria-label="Previous image"><i class="fas fa-chevron-left"></i></button>
-      <img loading="lazy" class="lightbox-img" src="" alt="" />
-      <button class="lightbox-nav next" aria-label="Next image"><i class="fas fa-chevron-right"></i></button>
-    </div>
-  </div>
 
   <button class="back-to-top" aria-label="Back to top" style="
     position: fixed; bottom: 24px; right: 24px; z-index: 500;

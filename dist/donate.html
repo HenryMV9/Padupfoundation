@@ -13,9 +13,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <script type="module" crossorigin src="/assets/main-Dezl1IUJ.js"></script>
-  <script type="module" crossorigin src="/assets/forms-CG0OuXLd.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/main-DA9pWmPF.css">
+  <script type="module" crossorigin src="/assets/donate-C6FPsYQ5.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/enhancements-OXuf2Fqc.js">
+  <link rel="modulepreload" crossorigin href="/assets/cursor-By3-8O7z.js">
+  <link rel="modulepreload" crossorigin href="/assets/forms-CG0OuXLd.js">
+  <link rel="modulepreload" crossorigin href="/assets/supabase-client-CDcWUE7U.js">
+  <link rel="stylesheet" crossorigin href="/assets/enhancements-BEu72xaN.css">
 </head>
 <body>
 
@@ -32,7 +35,9 @@
       <ul class="navbar-nav" role="list">
         <li><a href="index.html" class="nav-link">Home</a></li>
         <li><a href="about.html" class="nav-link">About</a></li>
+        <li><a href="founder.html" class="nav-link">Founder</a></li>
         <li><a href="gallery.html" class="nav-link">Gallery</a></li>
+        <li><a href="news.html" class="nav-link">News</a></li>
         <li><a href="donate.html" class="nav-link nav-donate">Donate</a></li>
         <li><a href="get-involved.html" class="nav-link">Get Involved</a></li>
         <li><a href="contact.html" class="nav-link">Contact</a></li>
@@ -82,7 +87,7 @@
   <!-- ===== DONATION FORM ===== -->
   <section class="section" aria-labelledby="donate-heading">
     <div class="container">
-      <div class="donate-grid">
+      <div class="donate-grid reveal">
 
         <!-- Form -->
         <div class="donation-form-card reveal from-left">
@@ -90,10 +95,22 @@
           <h2 id="donate-heading" style="margin-bottom: var(--space-2);">Make Your Donation</h2>
           <p style="margin-bottom: var(--space-8);">Choose an amount below or enter your own. All donations are processed securely via Flutterwave.</p>
 
+          <!-- Currency Selector -->
+          <div class="currency-selector-wrap">
+            <span class="currency-selector-label"><i class="fas fa-globe"></i> Currency:</span>
+            <select id="currency-selector" class="currency-selector" aria-label="Select donation currency">
+              <option value="NGN" data-symbol="&#8358;" selected>NGN — Nigerian Naira (&#8358;)</option>
+              <option value="USD" data-symbol="$">USD — US Dollar ($)</option>
+              <option value="GBP" data-symbol="&pound;">GBP — British Pound (&pound;)</option>
+              <option value="EUR" data-symbol="&euro;">EUR — Euro (&euro;)</option>
+              <option value="CAD" data-symbol="C$">CAD — Canadian Dollar (C$)</option>
+            </select>
+          </div>
+
           <!-- Amount Selection -->
           <div style="margin-bottom: var(--space-6);">
-            <label style="display: block; margin-bottom: var(--space-3); font-weight: 600; font-family: var(--font-heading); color: var(--gray-700);">Select Amount (₦)</label>
-            <div class="amount-grid">
+            <label style="display: block; margin-bottom: var(--space-3); font-weight: 600; font-family: var(--font-heading); color: var(--gray-700);" id="amount-label">Select Amount (₦)</label>
+            <div class="amount-grid" id="amount-grid">
               <button class="amount-btn" data-amount="2500">₦2,500</button>
               <button class="amount-btn selected" data-amount="5000">₦5,000</button>
               <button class="amount-btn" data-amount="10000">₦10,000</button>
@@ -102,7 +119,7 @@
               <button class="amount-btn" data-amount="100000">₦100,000</button>
             </div>
             <div class="form-group" style="margin-top: var(--space-3);">
-              <input type="number" id="custom-amount" class="form-control" placeholder="Or enter custom amount (₦)" min="100" aria-label="Custom donation amount in Naira" />
+              <input type="number" id="custom-amount" class="form-control" placeholder="Or enter custom amount (₦)" min="100" aria-label="Custom donation amount" />
             </div>
           </div>
 
@@ -323,7 +340,7 @@
             <div class="footer-contact-icon"><i class="fas fa-phone"></i></div>
             <div>
               <span style="display: block; color: var(--gray-500); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">Phone</span>
-              <a href="tel:+2348064574014">0806 457 4014</a>
+              <a href="tel:+2347063233363">0706 323 3363</a>
             </div>
           </div>
           <div class="footer-contact-item">
@@ -338,8 +355,8 @@
       <div class="footer-bottom">
         <p>&copy; 2026 Pad Up Foundation. All rights reserved.</p>
         <div class="footer-bottom-links">
-          <a href="#">Privacy Policy</a>
-          <a href="#">Terms of Use</a>
+          <a href="privacy.html">Privacy Policy</a>
+          <a href="terms.html">Terms &amp; Conditions</a>
         </div>
       </div>
     </div>
@@ -350,7 +367,7 @@
     width: 48px; height: 48px; border-radius: 50%;
     background: var(--gradient-primary); color: var(--white);
     display: flex; align-items: center; justify-content: center;
-    box-shadow: var(--shadow-pink); cursor: pointer; border: none;
+    box-shadow: var(--shadow-accent); cursor: pointer; border: none;
     font-size: 1rem; opacity: 0; transform: translateY(20px);
     transition: all var(--transition-base); pointer-events: none;">
     <i class="fas fa-arrow-up"></i>

@@ -16,9 +16,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <script type="module" crossorigin src="/assets/main-Dezl1IUJ.js"></script>
-  <script type="module" crossorigin src="/assets/gallery-B5KMgtzR.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/main-DA9pWmPF.css">
+  <script type="module" crossorigin src="/assets/main-e_nJ1ywp.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/enhancements-OXuf2Fqc.js">
+  <link rel="modulepreload" crossorigin href="/assets/cursor-By3-8O7z.js">
+  <link rel="modulepreload" crossorigin href="/assets/gallery-Wloo2J9S.js">
+  <link rel="modulepreload" crossorigin href="/assets/supabase-client-CDcWUE7U.js">
+  <link rel="stylesheet" crossorigin href="/assets/enhancements-BEu72xaN.css">
 </head>
 <body>
 
@@ -35,7 +38,9 @@
       <ul class="navbar-nav" role="list">
         <li><a href="index.html" class="nav-link">Home</a></li>
         <li><a href="about.html" class="nav-link">About</a></li>
+        <li><a href="founder.html" class="nav-link">Founder</a></li>
         <li><a href="gallery.html" class="nav-link">Gallery</a></li>
+        <li><a href="news.html" class="nav-link">News</a></li>
         <li><a href="donate.html" class="nav-link nav-donate">Donate</a></li>
         <li><a href="get-involved.html" class="nav-link">Get Involved</a></li>
         <li><a href="contact.html" class="nav-link">Contact</a></li>
@@ -286,6 +291,34 @@
     </div>
   </section>
 
+
+  <!-- ===== NEWSLETTER SIGNUP ===== -->
+  <section class="newsletter-section" aria-labelledby="newsletter-heading">
+    <div class="container">
+      <div class="newsletter-content reveal">
+        <div class="badge" style="background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.9); border: 1px solid rgba(255,255,255,0.2);">Newsletter</div>
+        <h2 id="newsletter-heading">Stay Connected</h2>
+        <p>Join our community and receive inspiring stories, project updates, and opportunities to make an impact.</p>
+        <form class="newsletter-form" id="newsletter-form" novalidate>
+          <div class="form-group">
+            <label for="newsletter-name">First Name</label>
+            <input type="text" id="newsletter-name" class="form-control" placeholder="Your first name" required autocomplete="given-name" />
+            <span class="error-msg" role="alert"></span>
+          </div>
+          <div class="form-group">
+            <label for="newsletter-email">Email Address</label>
+            <input type="email" id="newsletter-email" class="form-control" placeholder="your@email.com" required autocomplete="email" />
+            <span class="error-msg" role="alert"></span>
+          </div>
+          <button type="submit" class="btn btn-primary btn-lg newsletter-submit-btn" id="newsletter-submit">
+            <i class="fas fa-paper-plane"></i> Subscribe
+          </button>
+        </form>
+        <div class="newsletter-feedback" id="newsletter-feedback" role="status" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+
   <!-- ===== FOOTER ===== -->
   <footer class="footer" role="contentinfo">
     <div class="container">
@@ -331,7 +364,7 @@
             <div class="footer-contact-icon"><i class="fas fa-phone"></i></div>
             <div>
               <span style="display: block; color: var(--gray-500); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">Phone</span>
-              <a href="tel:+2348064574014">0806 457 4014</a>
+              <a href="tel:+2347063233363">0706 323 3363</a>
             </div>
           </div>
           <div class="footer-contact-item">
@@ -354,19 +387,49 @@
       <div class="footer-bottom">
         <p>&copy; 2024 Pad Up Foundation. All rights reserved.</p>
         <div class="footer-bottom-links">
-          <a href="#">Privacy Policy</a>
-          <a href="#">Terms of Use</a>
+          <a href="privacy.html">Privacy Policy</a>
+          <a href="terms.html">Terms &amp; Conditions</a>
+          <a href="admin.html">Admin</a>
         </div>
       </div>
     </div>
   </footer>
+
+  <!-- ===== NEWSLETTER POPUP ===== -->
+  <div class="newsletter-popup-overlay" id="newsletter-popup-overlay" role="dialog" aria-modal="true" aria-labelledby="popup-heading">
+    <div class="newsletter-popup">
+      <button class="newsletter-popup-close" id="newsletter-popup-close" aria-label="Close popup">
+        <i class="fas fa-times"></i>
+      </button>
+      <div class="newsletter-popup-icon">
+        <i class="fas fa-envelope-open-text"></i>
+      </div>
+      <h2 id="popup-heading">Stay in the Loop!</h2>
+      <p>Subscribe to get inspiring stories, impact updates, and opportunities to make a difference delivered to your inbox.</p>
+      <form class="newsletter-popup-form" id="newsletter-popup-form" novalidate>
+        <div class="form-group">
+          <input type="text" id="popup-name" class="form-control" placeholder="Your first name" required autocomplete="given-name" />
+          <span class="error-msg" role="alert"></span>
+        </div>
+        <div class="form-group">
+          <input type="email" id="popup-email" class="form-control" placeholder="your@email.com" required autocomplete="email" />
+          <span class="error-msg" role="alert"></span>
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg" id="popup-submit" style="width: 100%; justify-content: center;">
+          <i class="fas fa-paper-plane"></i> Subscribe Now
+        </button>
+      </form>
+      <div class="newsletter-popup-feedback" id="popup-feedback" role="status" aria-live="polite"></div>
+      <p class="newsletter-popup-disclaimer">No spam, ever. Unsubscribe anytime.</p>
+    </div>
+  </div>
 
   <!-- ===== LIGHTBOX ===== -->
   <div class="lightbox" role="dialog" aria-modal="true" aria-label="Image viewer">
     <div class="lightbox-content">
       <button class="lightbox-close" aria-label="Close image viewer"><i class="fas fa-times"></i></button>
       <button class="lightbox-nav prev" aria-label="Previous image"><i class="fas fa-chevron-left"></i></button>
-      <img class="lightbox-img" src="" alt="" />
+      <img loading="lazy" class="lightbox-img" src="" alt="" />
       <button class="lightbox-nav next" aria-label="Next image"><i class="fas fa-chevron-right"></i></button>
     </div>
   </div>
@@ -377,7 +440,7 @@
     width: 48px; height: 48px; border-radius: 50%;
     background: var(--gradient-primary); color: var(--white);
     display: flex; align-items: center; justify-content: center;
-    box-shadow: var(--shadow-pink); cursor: pointer; border: none;
+    box-shadow: var(--shadow-accent); cursor: pointer; border: none;
     font-size: 1rem; opacity: 0; transform: translateY(20px);
     transition: all var(--transition-base); pointer-events: none;">
     <i class="fas fa-arrow-up"></i>
