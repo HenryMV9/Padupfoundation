@@ -21,7 +21,7 @@ import { supabase } from './supabase-client.js';
     localStorage.setItem(STORAGE_KEY, '1');
   }
 
-  setTimeout(showPopup, 1500);
+  setTimeout(showPopup, 100);
 
   closeBtn.addEventListener('click', closePopup);
   overlay.addEventListener('click', function (e) {
