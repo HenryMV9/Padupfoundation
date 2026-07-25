@@ -93,6 +93,8 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
         loginForm.reset();
       } catch (err) {
         var msg = err && err.message ? err.message : '';
+        console.error('[Admin] Auth error:', err);
+        if (err && err.status) console.error('[Admin] Auth status:', err.status);
         var display;
         if (msg.indexOf('Invalid login credentials') !== -1) {
           display = 'Invalid email or password. Please verify your credentials and try again.';
