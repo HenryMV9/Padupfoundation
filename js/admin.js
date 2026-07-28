@@ -1,7 +1,7 @@
 /* ============================================================
-   PAD UP FOUNDATION - Admin Dashboard
-   Handles authentication, overview stats, and CRUD for
-   donations, news, gallery, and subscribers.
+   PAD UP FOUNDATION — Premium Admin Dashboard
+   Auth, overview stats, CRUD for donations, news, gallery,
+   and newsletter subscribers.
    ============================================================ */
 
 import { supabase, STORAGE_BUCKET } from './supabase-client.js';
@@ -15,6 +15,72 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
   let allNews = [];
   let allGallery = [];
   let pendingFile = null;
+
+  const PANEL_INFO = {
+    overview:    { title: 'Dashboard Overview', subtitle: "Welcome back! Here's what's happening with your platform." },
+    donations:   { title: 'Donation Management', subtitle: 'View and track all successful donations.' },
+    news:        { title: 'News Management', subtitle: 'Create, edit, and publish news articles.' },
+    gallery:     { title: 'Gallery Management', subtitle: 'Upload and organize gallery images.' },
+    subscribers: { title: 'Newsletter Subscribers', subtitle: 'View and export your subscriber list.' }
+  };
+
+  // ============================================================
+  // TOAST NOTIFICATIONS
+  // ============================================================
+  const toastContainer = document.getElementById('admin-toast-container');
+
+  function showToast(type, title, msg) {
+    const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-times-circle' : 'fa-info-circle';
+    const toast = document.createElement('div');
+    toast.className = 'admin-toast ' + type;
+    toast.innerHTML =
+      '<div class="admin-toast-icon"><i class="fas ' + icon + '"></i></div>' +
+      '<div class="admin-toast-body"><p class="admin-toast-title">' + escapeHtml(title) + '</p>' +
+      (msg ? '<p class="admin-toast-msg">' + escapeHtml(msg) + '</p>' : '') + '</div>';
+    toastContainer.appendChild(toast);
+    setTimeout(function () {
+      toast.classList.add('removing');
+      setTimeout(function () { toast.remove(); }, 300);
+    }, 4000);
+  }
+
+  // ============================================================
+  // CONFIRM DIALOG (replaces native confirm)
+  // ============================================================
+  const confirmOverlay = document.getElementById('admin-confirm-overlay');
+  const confirmTitle = document.getElementById('admin-confirm-title');
+  const confirmMsg = document.getElementById('admin-confirm-message');
+  const confirmDeleteBtn = document.getElementById('admin-confirm-delete');
+  const confirmCancelBtn = document.getElementById('admin-confirm-cancel');
+  let confirmResolve = null;
+
+  function showConfirm(title, message, confirmText) {
+    confirmTitle.textContent = title;
+    confirmMsg.textContent = message;
+    confirmDeleteBtn.innerHTML = '<i class="fas fa-trash"></i> ' + (confirmText || 'Delete');
+    confirmOverlay.classList.add('open');
+    confirmDeleteBtn.disabled = false;
+    return new Promise(function (resolve) {
+      confirmResolve = resolve;
+    });
+  }
+
+  function closeConfirm(result) {
+    confirmOverlay.classList.remove('open');
+    if (confirmResolve) {
+      confirmResolve(result);
+      confirmResolve = null;
+    }
+  }
+
+  confirmDeleteBtn.addEventListener('click', function () {
+    confirmDeleteBtn.disabled = true;
+    closeConfirm(true);
+  });
+  confirmCancelBtn.addEventListener('click', function () { closeConfirm(false); });
+  confirmOverlay.addEventListener('click', function (e) {
+    if (e.target === confirmOverlay) closeConfirm(false);
+  });
 
   // ============================================================
   // DOM ELEMENTS
@@ -32,14 +98,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
   const panelSubtitle = document.getElementById('panel-subtitle');
   const mobileToggle = document.getElementById('admin-mobile-toggle');
   const sidebar = document.getElementById('admin-sidebar');
-
-  const PANEL_INFO = {
-    overview: { title: 'Dashboard Overview', subtitle: "Welcome back! Here's what's happening with your platform." },
-    donations: { title: 'Donation Management', subtitle: 'View and track all successful donations.' },
-    news: { title: 'News Management', subtitle: 'Create, edit, and publish news articles.' },
-    gallery: { title: 'Gallery Management', subtitle: 'Upload and organize gallery images.' },
-    subscribers: { title: 'Newsletter Subscribers', subtitle: 'View and export subscriber list.' }
-  };
+  const sidebarBackdrop = document.getElementById('admin-sidebar-backdrop');
 
   // ============================================================
   // AUTH
@@ -52,7 +111,8 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       } else {
         showLogin();
       }
-    } catch {
+    } catch (err) {
+      console.error('[Admin] Session check error:', err);
       showLogin();
     }
   }
@@ -66,7 +126,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
     loginView.style.display = 'none';
     dashboardView.style.display = 'block';
     if (user && user.email) {
-      userEmailEl.textContent = user.email;
+      userEmailEl.innerHTML = '<i class="fas fa-user-circle"></i> ' + escapeHtml(user.email);
     }
     loadOverview();
   }
@@ -154,10 +214,8 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       panelTitle.textContent = PANEL_INFO[panel].title;
       panelSubtitle.textContent = PANEL_INFO[panel].subtitle;
 
-      // Close sidebar on mobile
-      sidebar.classList.remove('open');
+      closeSidebar();
 
-      // Load panel data
       if (panel === 'overview') loadOverview();
       else if (panel === 'donations') loadDonations();
       else if (panel === 'news') loadNews();
@@ -169,36 +227,47 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
   if (mobileToggle) {
     mobileToggle.addEventListener('click', function () {
       sidebar.classList.toggle('open');
+      sidebarBackdrop.classList.toggle('show');
     });
+  }
+  if (sidebarBackdrop) {
+    sidebarBackdrop.addEventListener('click', closeSidebar);
+  }
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    sidebarBackdrop.classList.remove('show');
   }
 
   // ============================================================
   // OVERVIEW
   // ============================================================
   async function loadOverview() {
+    showSkeletonStats();
     try {
       const [donationsRes, subscribersRes, galleryRes, newsRes] = await Promise.all([
-        supabase.from('donations').select('id', { count: 'exact', head: true }),
+        supabase.from('donations').select('*', { count: 'exact' }),
         supabase.from('newsletter_subscribers').select('id', { count: 'exact', head: true }),
         supabase.from('gallery_images').select('id', { count: 'exact', head: true }),
         supabase.from('news_articles').select('id', { count: 'exact', head: true })
       ]);
 
-      document.getElementById('stat-donations').textContent = donationsRes.count || 0;
+      const donationsData = donationsRes.data || [];
+      const donationCount = donationsRes.count || donationsData.length;
+      const uniqueDonors = new Set(donationsData.map(function (d) { return d.email || d.donor_name; }).filter(Boolean)).size;
+
+      document.getElementById('stat-donations').textContent = donationCount.toLocaleString();
+      document.getElementById('stat-donors').textContent = uniqueDonors.toLocaleString();
       document.getElementById('stat-subscribers').textContent = subscribersRes.count || 0;
       document.getElementById('stat-gallery').textContent = galleryRes.count || 0;
       document.getElementById('stat-news').textContent = newsRes.count || 0;
 
-      // Load recent donations
-      const { data: recent } = await supabase
-        .from('donations')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(5);
+      const recent = donationsData.slice().sort(function (a, b) {
+        return new Date(b.created_at) - new Date(a.created_at);
+      }).slice(0, 5);
 
       const tbody = document.getElementById('overview-recent-donations');
-      if (!recent || recent.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="admin-empty-state"><i class="fas fa-inbox"></i><br>No donations yet</td></tr>';
+      if (!recent.length) {
+        tbody.innerHTML = '<tr><td colspan="4" class="admin-empty-state"><i class="fas fa-inbox"></i><p>No donations yet</p></td></tr>';
       } else {
         tbody.innerHTML = recent.map(function (d) {
           return '<tr><td>' + escapeHtml(d.donor_name || 'Anonymous') + '</td><td>' + Number(d.amount).toLocaleString() + '</td><td>' + d.currency + '</td><td>' + formatDate(d.created_at) + '</td></tr>';
@@ -206,13 +275,24 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       }
     } catch (err) {
       console.error('[Admin] Overview error:', err.message);
+      showToast('error', 'Failed to load', 'Could not load overview data.');
     }
+  }
+
+  function showSkeletonStats() {
+    var vals = ['stat-donations', 'stat-donors', 'stat-subscribers', 'stat-gallery', 'stat-news'];
+    vals.forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.textContent = '—';
+    });
   }
 
   // ============================================================
   // DONATIONS
   // ============================================================
   async function loadDonations() {
+    const tbody = document.getElementById('donations-table-body');
+    tbody.innerHTML = skeletonRows(6, 6);
     try {
       const { data, error } = await supabase
         .from('donations')
@@ -225,6 +305,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       updateDonationSummary();
     } catch (err) {
       console.error('[Admin] Donations error:', err.message);
+      tbody.innerHTML = '<tr><td colspan="6" class="admin-empty-state"><i class="fas fa-exclamation-circle"></i><p>Failed to load donations</p></td></tr>';
     }
   }
 
@@ -232,7 +313,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
     const total = allDonations.reduce(function (sum, d) { return sum + parseFloat(d.amount); }, 0);
     const uniqueDonors = new Set(allDonations.map(function (d) { return d.email || d.donor_name; }).filter(Boolean)).size;
     document.getElementById('donations-total').textContent = total.toLocaleString(undefined, { maximumFractionDigits: 2 });
-    document.getElementById('donors-total').textContent = uniqueDonors;
+    document.getElementById('donors-total').textContent = uniqueDonors.toLocaleString();
   }
 
   function renderDonations() {
@@ -252,21 +333,23 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       filtered.sort(function (a, b) { return parseFloat(b.amount) - parseFloat(a.amount); });
     } else if (sortBy === 'lowest') {
       filtered.sort(function (a, b) { return parseFloat(a.amount) - parseFloat(b.amount); });
+    } else if (sortBy === 'oldest') {
+      filtered.sort(function (a, b) { return new Date(a.created_at) - new Date(b.created_at); });
     }
 
     const tbody = document.getElementById('donations-table-body');
     if (!filtered.length) {
-      tbody.innerHTML = '<tr><td colspan="6" class="admin-empty-state"><i class="fas fa-inbox"></i><br>No donations found</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" class="admin-empty-state"><i class="fas fa-inbox"></i><p>No donations found</p></td></tr>';
       return;
     }
 
     tbody.innerHTML = filtered.map(function (d) {
       return '<tr>' +
-        '<td>' + escapeHtml(d.donor_name || 'Anonymous') + '</td>' +
+        '<td><strong>' + escapeHtml(d.donor_name || 'Anonymous') + '</strong></td>' +
         '<td>' + escapeHtml(d.email || '\u2014') + '</td>' +
         '<td>' + Number(d.amount).toLocaleString() + '</td>' +
         '<td>' + d.currency + '</td>' +
-        '<td><span class="status-badge status-successful">' + d.payment_status + '</span></td>' +
+        '<td><span class="status-badge status-successful">' + escapeHtml(d.payment_status) + '</span></td>' +
         '<td>' + formatDate(d.created_at) + '</td>' +
         '</tr>';
     }).join('');
@@ -276,10 +359,31 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
   document.getElementById('donations-currency-filter')?.addEventListener('change', renderDonations);
   document.getElementById('donations-sort')?.addEventListener('change', renderDonations);
 
+  document.getElementById('donations-export-btn')?.addEventListener('click', function () {
+    if (!allDonations.length) {
+      showToast('info', 'No data', 'There are no donations to export.');
+      return;
+    }
+    var csv = ['Donor Name,Email,Amount,Currency,Payment Status,Transaction Date'];
+    allDonations.forEach(function (d) {
+      csv.push([
+        csvEscape(d.donor_name || 'Anonymous'),
+        csvEscape(d.email || ''),
+        d.amount,
+        d.currency,
+        csvEscape(d.payment_status),
+        new Date(d.created_at).toISOString()
+      ].join(','));
+    });
+    downloadCSV(csv.join('\n'), 'donations');
+  });
+
   // ============================================================
   // NEWS
   // ============================================================
   async function loadNews() {
+    const tbody = document.getElementById('news-table-body');
+    tbody.innerHTML = skeletonRows(3, 4);
     try {
       const { data, error } = await supabase
         .from('news_articles')
@@ -291,30 +395,32 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       renderNews();
     } catch (err) {
       console.error('[Admin] News error:', err.message);
+      tbody.innerHTML = '<tr><td colspan="4" class="admin-empty-state"><i class="fas fa-exclamation-circle"></i><p>Failed to load articles</p></td></tr>';
     }
   }
 
   function renderNews() {
     const tbody = document.getElementById('news-table-body');
     if (!allNews.length) {
-      tbody.innerHTML = '<tr><td colspan="4" class="admin-empty-state"><i class="fas fa-newspaper"></i><br>No articles yet. Click "Add Article" to create one.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="4" class="admin-empty-state"><i class="fas fa-newspaper"></i><p>No articles yet. Click "Add Article" to create one.</p></td></tr>';
       return;
     }
 
     tbody.innerHTML = allNews.map(function (article) {
+      var toggleIcon = article.status === 'published' ? 'fa-toggle-on' : 'fa-toggle-off';
+      var toggleTitle = article.status === 'published' ? 'Unpublish' : 'Publish';
       return '<tr>' +
-        '<td>' + escapeHtml(article.title) + '</td>' +
+        '<td><strong>' + escapeHtml(article.title) + '</strong><br><span style="font-size:0.75rem;color:var(--gray-400);">' + escapeHtml(truncateText(article.summary, 60)) + '</span></td>' +
         '<td><span class="status-badge status-' + article.status + '">' + article.status + '</span></td>' +
         '<td>' + (article.published_at ? formatDate(article.published_at) : '\u2014') + '</td>' +
         '<td>' +
-          '<button class="admin-action-btn" data-edit-news="' + article.id + '" title="Edit"><i class="fas fa-edit"></i></button> ' +
-          '<button class="admin-action-btn" data-toggle-news="' + article.id + '" title="Toggle publish"><i class="fas fa-toggle-on"></i></button> ' +
+          '<button class="admin-action-btn" data-edit-news="' + article.id + '" title="Edit"><i class="fas fa-edit"></i></button>' +
+          '<button class="admin-action-btn toggle" data-toggle-news="' + article.id + '" title="' + toggleTitle + '"><i class="fas ' + toggleIcon + '"></i></button>' +
           '<button class="admin-action-btn delete" data-delete-news="' + article.id + '" title="Delete"><i class="fas fa-trash"></i></button>' +
         '</td>' +
         '</tr>';
     }).join('');
 
-    // Attach handlers
     tbody.querySelectorAll('[data-edit-news]').forEach(function (btn) {
       btn.addEventListener('click', function () { openNewsModal(btn.dataset.editNews); });
     });
@@ -348,7 +454,6 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       document.getElementById('news-title-input').value = article.title;
       document.getElementById('news-summary-input').value = article.summary;
       document.getElementById('news-content-input').value = article.content;
-      document.getElementById('news-image-url').value = article.featured_image || '';
       document.getElementById('news-status-input').value = article.status;
     } else {
       document.getElementById('news-modal-title').textContent = 'Add Article';
@@ -363,21 +468,24 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
     const title = document.getElementById('news-title-input').value.trim();
     const summary = document.getElementById('news-summary-input').value.trim();
     const content = document.getElementById('news-content-input').value.trim();
-    const imageUrl = document.getElementById('news-image-url').value.trim();
     const status = document.getElementById('news-status-input').value;
     const feedback = document.getElementById('news-form-feedback');
+    const saveBtn = document.getElementById('news-save-btn');
 
     if (!title || !summary || !content) {
       feedback.className = 'admin-login-feedback error-state';
-      feedback.innerHTML = '<i class="fas fa-exclamation-circle"></i> Title, summary, and content are required.';
+      feedback.innerHTML = '<i class="fas fa-exclamation-circle"></i> Title, preview, and content are all required.';
       return;
     }
+
+    const originalText = saveBtn.innerHTML;
+    saveBtn.innerHTML = '<span class="spinner"></span> Saving...';
+    saveBtn.disabled = true;
 
     const payload = {
       title: title,
       summary: summary,
       content: content,
-      featured_image: imageUrl || null,
       status: status,
       published_at: status === 'published' ? new Date().toISOString() : null
     };
@@ -386,15 +494,20 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       if (id) {
         const { error } = await supabase.from('news_articles').update(payload).eq('id', id);
         if (error) throw error;
+        showToast('success', 'Article updated', '"' + title + '" has been saved.');
       } else {
         const { error } = await supabase.from('news_articles').insert([payload]);
         if (error) throw error;
+        showToast('success', 'Article created', '"' + title + '" has been added.');
       }
       newsModal.classList.remove('open');
       loadNews();
     } catch (err) {
       feedback.className = 'admin-login-feedback error-state';
       feedback.innerHTML = '<i class="fas fa-exclamation-circle"></i> Failed to save: ' + err.message;
+    } finally {
+      saveBtn.innerHTML = originalText;
+      saveBtn.disabled = false;
     }
   });
 
@@ -408,20 +521,25 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
         published_at: newStatus === 'published' ? new Date().toISOString() : null
       }).eq('id', id);
       if (error) throw error;
+      showToast('success', newStatus === 'published' ? 'Article published' : 'Article unpublished', '"' + article.title + '" is now ' + newStatus + '.');
       loadNews();
     } catch (err) {
-      alert('Failed to update: ' + err.message);
+      showToast('error', 'Update failed', err.message);
     }
   }
 
   async function deleteNews(id) {
-    if (!confirm('Are you sure you want to delete this article? This cannot be undone.')) return;
+    const article = allNews.find(function (a) { return a.id === id; });
+    if (!article) return;
+    const confirmed = await showConfirm('Delete Article', 'Are you sure you want to delete "' + article.title + '"? This cannot be undone.', 'Delete Article');
+    if (!confirmed) return;
     try {
       const { error } = await supabase.from('news_articles').delete().eq('id', id);
       if (error) throw error;
+      showToast('success', 'Article deleted', '"' + article.title + '" has been removed.');
       loadNews();
     } catch (err) {
-      alert('Failed to delete: ' + err.message);
+      showToast('error', 'Delete failed', err.message);
     }
   }
 
@@ -429,6 +547,8 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
   // GALLERY
   // ============================================================
   async function loadGallery() {
+    const grid = document.getElementById('admin-gallery-grid');
+    grid.innerHTML = '<div class="admin-empty-state" style="grid-column: 1/-1;"><p>Loading gallery...</p></div>';
     try {
       const { data, error } = await supabase
         .from('gallery_images')
@@ -440,41 +560,48 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       renderGallery();
     } catch (err) {
       console.error('[Admin] Gallery error:', err.message);
+      grid.innerHTML = '<div class="admin-empty-state" style="grid-column: 1/-1;"><i class="fas fa-exclamation-circle"></i><p>Failed to load gallery</p></div>';
     }
   }
 
   function renderGallery() {
     const grid = document.getElementById('admin-gallery-grid');
     if (!allGallery.length) {
-      grid.innerHTML = '<div class="admin-empty-state" style="grid-column: 1/-1;"><i class="fas fa-images"></i><br>No images yet. Click "Upload Image" to add one.</div>';
+      grid.innerHTML = '<div class="admin-empty-state" style="grid-column: 1/-1;"><i class="fas fa-images"></i><p>No images yet. Click "Upload Image" to add one.</p></div>';
       return;
     }
 
     grid.innerHTML = allGallery.map(function (img) {
       return '<div class="admin-gallery-item">' +
-        '<img src="' + img.image_url + '" alt="' + escapeHtml(img.caption || '') + '" loading="lazy" />' +
+        '<img src="' + img.image_url + '" alt="' + escapeHtml(img.caption || 'Gallery image') + '" loading="lazy" />' +
         '<div class="admin-gallery-item-overlay">' +
-          '<button class="delete" data-delete-gallery="' + img.id + '" title="Delete"><i class="fas fa-trash"></i></button>' +
+          '<span class="admin-gallery-item-caption">' + escapeHtml(img.caption || img.category) + '</span>' +
+          '<button class="admin-action-btn delete" data-delete-gallery="' + img.id + '" title="Delete"><i class="fas fa-trash"></i></button>' +
         '</div>' +
       '</div>';
     }).join('');
 
     grid.querySelectorAll('[data-delete-gallery]').forEach(function (btn) {
       btn.addEventListener('click', async function () {
-        if (!confirm('Delete this image?')) return;
         const id = btn.dataset.deleteGallery;
         const img = allGallery.find(function (g) { return g.id === id; });
+        if (!img) return;
+        const confirmed = await showConfirm('Delete Image', 'Are you sure you want to delete this image? It will be permanently removed.', 'Delete Image');
+        if (!confirmed) return;
         try {
-          // Delete from storage if it's in our bucket
-          if (img && img.image_url && img.image_url.includes(STORAGE_BUCKET)) {
+          if (img.image_url && img.image_url.includes(STORAGE_BUCKET)) {
             const path = img.image_url.split('/' + STORAGE_BUCKET + '/')[1];
-            if (path) await supabase.storage.from(STORAGE_BUCKET).remove([path]);
+            if (path) {
+              const { error: storageError } = await supabase.storage.from(STORAGE_BUCKET).remove([path]);
+              if (storageError) console.warn('[Admin] Storage delete warning:', storageError.message);
+            }
           }
           const { error } = await supabase.from('gallery_images').delete().eq('id', id);
           if (error) throw error;
+          showToast('success', 'Image deleted', 'The image has been removed from gallery and storage.');
           loadGallery();
         } catch (err) {
-          alert('Failed to delete: ' + err.message);
+          showToast('error', 'Delete failed', err.message);
         }
       });
     });
@@ -495,6 +622,8 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       document.getElementById('gallery-form').reset();
       document.getElementById('gallery-form-feedback').className = '';
       document.getElementById('gallery-form-feedback').style.display = 'none';
+      document.getElementById('gallery-progress').style.display = 'none';
+      document.getElementById('gallery-progress-bar').style.width = '0';
       galleryModal.classList.add('open');
     });
   }
@@ -509,9 +638,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
     galleryDropArea.addEventListener('drop', function (e) {
       e.preventDefault();
       galleryDropArea.classList.remove('dragover');
-      if (e.dataTransfer.files.length) {
-        handleFileSelect(e.dataTransfer.files[0]);
-      }
+      if (e.dataTransfer.files.length) handleFileSelect(e.dataTransfer.files[0]);
     });
   }
 
@@ -523,7 +650,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
 
   function handleFileSelect(file) {
     if (!file.type.startsWith('image/')) {
-      showGalleryFeedback('error-state', 'Please select an image file.');
+      showGalleryFeedback('error-state', 'Please select an image file (PNG, JPG, or WEBP).');
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
@@ -553,15 +680,26 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
 
     const caption = document.getElementById('gallery-caption').value.trim();
     const category = document.getElementById('gallery-category').value;
+    const uploadBtn = document.getElementById('gallery-upload-confirm');
 
     const filePath = 'gallery/' + Date.now() + '-' + pendingFile.name.replace(/[^a-zA-Z0-9.\-]/g, '_');
+
+    uploadBtn.innerHTML = '<span class="spinner"></span> Uploading...';
+    uploadBtn.disabled = true;
+    document.getElementById('gallery-progress').style.display = 'block';
 
     try {
       const { error: uploadError } = await supabase.storage
         .from(STORAGE_BUCKET)
-        .upload(filePath, pendingFile, { cacheControl: '3600', upsert: false });
+        .upload(filePath, pendingFile, {
+          cacheControl: '3600',
+          upsert: false,
+          contentType: pendingFile.type
+        });
 
       if (uploadError) throw uploadError;
+
+      document.getElementById('gallery-progress-bar').style.width = '80%';
 
       const { data: urlData } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(filePath);
       const imageUrl = urlData.publicUrl;
@@ -574,10 +712,16 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
 
       if (dbError) throw dbError;
 
+      document.getElementById('gallery-progress-bar').style.width = '100%';
+
+      showToast('success', 'Image uploaded', 'The image has been added to the gallery.');
       galleryModal.classList.remove('open');
       loadGallery();
     } catch (err) {
       showGalleryFeedback('error-state', 'Upload failed: ' + err.message);
+    } finally {
+      uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Upload';
+      uploadBtn.disabled = false;
     }
   });
 
@@ -585,6 +729,8 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
   // SUBSCRIBERS
   // ============================================================
   async function loadSubscribers() {
+    const tbody = document.getElementById('subscribers-table-body');
+    tbody.innerHTML = skeletonRows(3, 3);
     try {
       const { data, error } = await supabase
         .from('newsletter_subscribers')
@@ -596,6 +742,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       renderSubscribers();
     } catch (err) {
       console.error('[Admin] Subscribers error:', err.message);
+      tbody.innerHTML = '<tr><td colspan="3" class="admin-empty-state"><i class="fas fa-exclamation-circle"></i><p>Failed to load subscribers</p></td></tr>';
     }
   }
 
@@ -605,44 +752,36 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
 
     const filtered = allSubscribers.filter(function (s) {
       return !search ||
-        s.first_name.toLowerCase().includes(search) ||
-        s.email.toLowerCase().includes(search);
+        (s.first_name && s.first_name.toLowerCase().includes(search)) ||
+        (s.email && s.email.toLowerCase().includes(search));
     });
 
     if (!filtered.length) {
-      tbody.innerHTML = '<tr><td colspan="3" class="admin-empty-state"><i class="fas fa-users"></i><br>No subscribers found</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="3" class="admin-empty-state"><i class="fas fa-users"></i><p>No subscribers found</p></td></tr>';
       return;
     }
 
     tbody.innerHTML = filtered.map(function (s) {
-      return '<tr><td>' + escapeHtml(s.first_name) + '</td><td>' + escapeHtml(s.email) + '</td><td>' + formatDate(s.subscribed_at) + '</td></tr>';
+      return '<tr><td><strong>' + escapeHtml(s.first_name) + '</strong></td><td>' + escapeHtml(s.email) + '</td><td>' + formatDate(s.subscribed_at) + '</td></tr>';
     }).join('');
   }
 
   document.getElementById('subscribers-search')?.addEventListener('input', renderSubscribers);
 
-  // CSV Export
   document.getElementById('export-csv-btn')?.addEventListener('click', function () {
     if (!allSubscribers.length) {
-      alert('No subscribers to export.');
+      showToast('info', 'No data', 'There are no subscribers to export.');
       return;
     }
-
-    const csv = ['First Name,Email,Date Joined'];
+    var csv = ['First Name,Email,Date Joined'];
     allSubscribers.forEach(function (s) {
-      const name = csvEscape(s.first_name);
-      const email = csvEscape(s.email);
-      const date = new Date(s.subscribed_at).toISOString();
-      csv.push(name + ',' + email + ',' + date);
+      csv.push([
+        csvEscape(s.first_name),
+        csvEscape(s.email),
+        new Date(s.subscribed_at).toISOString()
+      ].join(','));
     });
-
-    const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'newsletter-subscribers-' + new Date().toISOString().split('T')[0] + '.csv';
-    a.click();
-    URL.revokeObjectURL(url);
+    downloadCSV(csv.join('\n'), 'newsletter-subscribers');
   });
 
   // ============================================================
@@ -660,6 +799,13 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
     });
   });
 
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.admin-modal-overlay.open').forEach(function (m) { m.classList.remove('open'); });
+      if (confirmOverlay.classList.contains('open')) closeConfirm(false);
+    }
+  });
+
   // ============================================================
   // UTILITIES
   // ============================================================
@@ -670,9 +816,14 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
 
   function escapeHtml(str) {
     if (!str) return '';
-    const div = document.createElement('div');
+    var div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
+  }
+
+  function truncateText(str, n) {
+    if (!str) return '';
+    return str.length > n ? str.slice(0, n) + '...' : str;
   }
 
   function csvEscape(str) {
@@ -681,6 +832,27 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       return '"' + str.replace(/"/g, '""') + '"';
     }
     return str;
+  }
+
+  function downloadCSV(content, prefix) {
+    var blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = prefix + '-' + new Date().toISOString().split('T')[0] + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('success', 'Export complete', 'CSV file has been downloaded.');
+  }
+
+  function skeletonRows(count, cols) {
+    var rows = [];
+    for (var i = 0; i < count; i++) {
+      rows.push('<tr><td colspan="' + cols + '"><div class="skeleton skeleton-row"></div></td></tr>');
+    }
+    return rows.join('');
   }
 
   // ============================================================

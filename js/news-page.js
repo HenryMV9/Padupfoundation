@@ -1,6 +1,7 @@
 /* ============================================================
    PAD UP FOUNDATION - News Page (Listing + Detail)
    Handles /news.html (listing) and /news.html?id=<uuid> (detail)
+   Text-only cards — no featured images.
    ============================================================ */
 
 import { supabase } from './supabase-client.js';
@@ -15,24 +16,26 @@ import { supabase } from './supabase-client.js';
   function formatDate(dateStr) {
     if (!dateStr) return '';
     const d = new Date(dateStr);
-    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    return d.toLocaleDateString('en-US', { year: 'long', month: 'long', day: 'numeric' });
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
   }
 
   function createNewsCard(article) {
     const card = document.createElement('article');
-    card.className = 'news-card';
+    card.className = 'news-card news-card-text reveal';
     card.setAttribute('role', 'listitem');
 
-    const imageHtml = article.featured_image
-      ? `<div class="news-card-image"><img src="${article.featured_image}" alt="${article.title}" loading="lazy" /></div>`
-      : `<div class="news-card-image" style="background: var(--gradient-primary); display: flex; align-items: center; justify-content: center;"><i class="fas fa-newspaper" style="font-size: 2rem; color: rgba(255,255,255,0.5);"></i></div>`;
-
     card.innerHTML = `
-      ${imageHtml}
       <div class="news-card-body">
         <div class="news-card-date"><i class="far fa-calendar"></i> ${formatDate(article.published_at || article.created_at)}</div>
-        <h3>${article.title}</h3>
-        <p class="news-card-summary">${article.summary}</p>
+        <h3>${escapeHtml(article.title)}</h3>
+        <p class="news-card-summary">${escapeHtml(article.summary)}</p>
         <a href="news.html?id=${article.id}" class="news-card-readmore">Read More <i class="fas fa-arrow-right"></i></a>
       </div>
     `;
@@ -90,35 +93,23 @@ import { supabase } from './supabase-client.js';
       if (error) throw error;
 
       if (!data) {
-        // Article not found or not published — show listing
         loadListing();
         return;
       }
 
-      // Show detail, hide listing
       listingSection.style.display = 'none';
       detailSection.style.display = 'block';
-
-      const img = document.getElementById('news-detail-image');
-      if (data.featured_image) {
-        img.src = data.featured_image;
-        img.alt = data.title;
-        img.style.display = 'block';
-      } else {
-        img.style.display = 'none';
-      }
 
       document.getElementById('news-detail-title').textContent = data.title;
       document.getElementById('news-detail-date').textContent = formatDate(data.published_at || data.created_at);
       document.getElementById('news-detail-body').innerHTML = data.content;
-      document.title = data.title + ' — Pad Up Foundation';
+      document.title = data.title + ' \u2014 Pad Up Foundation';
     } catch (err) {
       console.error('[News Detail] Failed to load:', err.message);
       loadListing();
     }
   }
 
-  // Check URL for article ID
   const params = new URLSearchParams(window.location.search);
   const articleId = params.get('id');
 
