@@ -88,24 +88,21 @@ import { supabase } from './supabase-client.js';
     submitBtn.disabled = true;
 
     try {
-      const { data: existing } = await supabase
+      const { error } = await supabase
         .from('newsletter_subscribers')
-        .select('email')
-        .eq('email', email)
-        .maybeSingle();
+        .insert([{ first_name: name, email: email }]);
 
-      if (existing) {
+      if (error && error.code !== '23505') {
+        console.error('[Newsletter Popup] Insert error:', error.message, error.details, error.hint);
+        throw error;
+      }
+
+      if (error && error.code === '23505') {
         feedback.className = 'newsletter-popup-feedback success';
         feedback.innerHTML = '<i class="fas fa-check-circle"></i> You\'re already subscribed! Thank you.';
         setTimeout(closePopup, 2000);
         return;
       }
-
-      const { error } = await supabase
-        .from('newsletter_subscribers')
-        .insert([{ first_name: name, email: email }]);
-
-      if (error && error.code !== '23505') throw error;
 
       feedback.className = 'newsletter-popup-feedback success';
       feedback.innerHTML = '<i class="fas fa-check-circle"></i> Welcome aboard, ' + name + '! Check your inbox for updates.';

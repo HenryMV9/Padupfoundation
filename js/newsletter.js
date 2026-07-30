@@ -91,21 +91,6 @@ import { supabase } from './supabase-client.js';
     feedback.style.display = 'none';
 
     try {
-      // Check for duplicate first
-      const { data: existing } = await supabase
-        .from('newsletter_subscribers')
-        .select('email')
-        .eq('email', email)
-        .maybeSingle();
-
-      if (existing) {
-        showFeedback('error-state', 'You\'re already subscribed! Thank you for being part of our community.');
-        form.reset();
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-        return;
-      }
-
       const { error } = await supabase
         .from('newsletter_subscribers')
         .insert([{ first_name: name, email: email }]);
@@ -114,6 +99,7 @@ import { supabase } from './supabase-client.js';
         if (error.code === '23505') {
           showFeedback('error-state', 'You\'re already subscribed! Thank you for being part of our community.');
         } else {
+          console.error('[Newsletter] Insert error:', error.message, error.details, error.hint);
           throw error;
         }
       } else {

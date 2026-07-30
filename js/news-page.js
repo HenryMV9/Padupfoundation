@@ -20,7 +20,11 @@ import { supabase } from './supabase-client.js';
   function formatDate(dateStr) {
     if (!dateStr) return '';
     const d = new Date(dateStr);
-    return d.toLocaleDateString('en-US', { year: 'long', month: 'long', day: 'numeric' });
+    if (isNaN(d.getTime())) {
+      console.error('[News Page] Invalid date value:', dateStr);
+      return '';
+    }
+    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   }
 
   function escapeHtml(str) {

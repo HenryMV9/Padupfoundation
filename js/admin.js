@@ -341,8 +341,8 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
         }).join('');
       }
     } catch (err) {
-      console.error('[Admin] Overview error:', err.message);
-      showToast('error', 'Failed to load', 'Could not load overview data.');
+      console.error('[Admin] Overview fetch error:', err.message, err.details || '', err.hint || '', err);
+      showToast('error', 'Failed to load', 'Could not load overview data. ' + err.message);
     }
   }
 
@@ -377,8 +377,8 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       renderDonations();
       updateDonationSummary();
     } catch (err) {
-      console.error('[Admin] Donations error:', err.message);
-      tbody.innerHTML = '<tr><td colspan="6" class="admin-empty-state"><i class="fas fa-exclamation-circle"></i><p>Failed to load donations</p></td></tr>';
+      console.error('[Admin] Donations fetch error:', err.message, err.details || '', err.hint || '', err);
+      tbody.innerHTML = '<tr><td colspan="6" class="admin-empty-state"><i class="fas fa-exclamation-circle"></i><p>Failed to load donations: ' + err.message + '</p></td></tr>';
     }
   }
 
@@ -478,8 +478,8 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       allNews = data || [];
       renderNews();
     } catch (err) {
-      console.error('[Admin] News error:', err.message);
-      tbody.innerHTML = '<tr><td colspan="4" class="admin-empty-state"><i class="fas fa-exclamation-circle"></i><p>Failed to load articles</p></td></tr>';
+      console.error('[Admin] News fetch error:', err.message, err.details || '', err.hint || '', err);
+      tbody.innerHTML = '<tr><td colspan="4" class="admin-empty-state"><i class="fas fa-exclamation-circle"></i><p>Failed to load articles: ' + err.message + '</p></td></tr>';
     }
   }
 
@@ -609,7 +609,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
         loadNews();
         loadOverview();
       } catch (err) {
-        console.error('[Admin] News save error:', err.message);
+        console.error('[Admin] News save error:', err.message, err.details || '', err.hint || '', err);
         if (feedback) {
           feedback.className = 'admin-login-feedback error-state';
           feedback.innerHTML = '<i class="fas fa-exclamation-circle"></i> Failed to save: ' + err.message;
@@ -636,7 +636,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       loadNews();
       loadOverview();
     } catch (err) {
-      console.error('[Admin] News toggle error:', err.message);
+      console.error('[Admin] News toggle error:', err.message, err.details || '', err.hint || '', err);
       showToast('error', 'Update failed', err.message);
     }
   }
@@ -653,7 +653,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       loadNews();
       loadOverview();
     } catch (err) {
-      console.error('[Admin] News delete error:', err.message);
+      console.error('[Admin] News delete error:', err.message, err.details || '', err.hint || '', err);
       showToast('error', 'Delete failed', err.message);
     }
   }
@@ -675,8 +675,8 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       allGallery = data || [];
       renderGallery();
     } catch (err) {
-      console.error('[Admin] Gallery error:', err.message);
-      grid.innerHTML = '<div class="admin-empty-state" style="grid-column: 1/-1;"><i class="fas fa-exclamation-circle"></i><p>Failed to load gallery</p></div>';
+      console.error('[Admin] Gallery fetch error:', err.message, err.details || '', err.hint || '', err);
+      grid.innerHTML = '<div class="admin-empty-state" style="grid-column: 1/-1;"><i class="fas fa-exclamation-circle"></i><p>Failed to load gallery: ' + err.message + '</p></div>';
     }
   }
 
@@ -706,23 +706,28 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
         const confirmed = await showConfirm('Delete Image', 'Are you sure you want to delete this image? It will be permanently removed.', 'Delete Image');
         if (!confirmed) return;
         try {
-          // Delete from Storage first if it's a Supabase-hosted image
-          if (img.image_url && img.image_url.indexOf(STORAGE_BUCKET) !== -1) {
+          // Only attempt storage delete for Supabase-hosted images (not local /images/ paths)
+          if (img.image_url && img.image_url.indexOf('/storage/v1/object/public/') !== -1) {
             var parts = img.image_url.split('/' + STORAGE_BUCKET + '/');
             if (parts.length > 1 && parts[1]) {
               var path = parts[1];
               const { error: storageError } = await supabase.storage.from(STORAGE_BUCKET).remove([path]);
-              if (storageError) console.warn('[Admin] Storage delete warning:', storageError.message);
+              if (storageError) {
+                console.error('[Admin] Storage delete error:', storageError.message, '| path:', path);
+              }
             }
           }
           // Delete from database
           const { error } = await supabase.from('gallery_images').delete().eq('id', id);
-          if (error) throw error;
+          if (error) {
+            console.error('[Admin] Gallery DB delete error:', error.message, error.details, error.hint);
+            throw error;
+          }
           showToast('success', 'Image deleted', 'The image has been removed from gallery and storage.');
           loadGallery();
           loadOverview();
         } catch (err) {
-          console.error('[Admin] Gallery delete error:', err.message);
+          console.error('[Admin] Gallery delete failed:', err.message, err);
           showToast('error', 'Delete failed', err.message);
         }
       });
@@ -817,7 +822,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       const category = document.getElementById('gallery-category').value;
       const uploadBtn = document.getElementById('gallery-upload-confirm');
 
-      const filePath = 'gallery/' + Date.now() + '-' + pendingFile.name.replace(/[^a-zA-Z0-9.\-]/g, '_');
+      const filePath = Date.now() + '-' + pendingFile.name.replace(/[^a-zA-Z0-9.\-]/g, '_');
 
       uploadBtn.innerHTML = '<span class="spinner"></span> Uploading...';
       uploadBtn.disabled = true;
@@ -833,7 +838,10 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
             contentType: pendingFile.type
           });
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error('[Admin] Storage upload error:', uploadError.message, uploadError.statusCode, uploadError);
+          throw new Error('Storage error: ' + uploadError.message);
+        }
 
         var gProgressBar = document.getElementById('gallery-progress-bar');
         if (gProgressBar) gProgressBar.style.width = '80%';
@@ -847,7 +855,12 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
           category: category
         }]);
 
-        if (dbError) throw dbError;
+        if (dbError) {
+          console.error('[Admin] Gallery DB insert error:', dbError.message, dbError.details, dbError.hint, dbError);
+          // Clean up orphaned storage file since DB insert failed
+          await supabase.storage.from(STORAGE_BUCKET).remove([filePath]);
+          throw new Error('Insert error: ' + dbError.message);
+        }
 
         if (gProgressBar) gProgressBar.style.width = '100%';
 
@@ -856,8 +869,8 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
         loadGallery();
         loadOverview();
       } catch (err) {
-        console.error('[Admin] Gallery upload error:', err.message);
-        showGalleryFeedback('error-state', 'Upload failed: ' + err.message);
+        console.error('[Admin] Gallery upload failed:', err.message, err);
+        showGalleryFeedback('error-state', err.message || 'Upload failed');
       } finally {
         uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Upload';
         uploadBtn.disabled = false;
@@ -882,8 +895,8 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       allSubscribers = data || [];
       renderSubscribers();
     } catch (err) {
-      console.error('[Admin] Subscribers error:', err.message);
-      tbody.innerHTML = '<tr><td colspan="3" class="admin-empty-state"><i class="fas fa-exclamation-circle"></i><p>Failed to load subscribers</p></td></tr>';
+      console.error('[Admin] Subscribers fetch error:', err.message, err.details || '', err.hint || '', err);
+      tbody.innerHTML = '<tr><td colspan="3" class="admin-empty-state"><i class="fas fa-exclamation-circle"></i><p>Failed to load subscribers: ' + err.message + '</p></td></tr>';
     }
   }
 
@@ -959,7 +972,12 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
   // ============================================================
   function formatDate(dateStr) {
     if (!dateStr) return '\u2014';
-    return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    var d = new Date(dateStr);
+    if (isNaN(d.getTime())) {
+      console.error('[Admin] formatDate received invalid date:', dateStr);
+      return '\u2014';
+    }
+    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
   }
 
   function escapeHtml(str) {
