@@ -1,7 +1,7 @@
 /* ============================================================
    PAD UP FOUNDATION — Premium Admin Dashboard
    Auth, overview stats, CRUD for donations, news, gallery,
-   and newsletter subscribers — with Supabase Realtime.
+   and newsletter subscribers.
    ============================================================ */
 
 import { supabase, STORAGE_BUCKET } from './supabase-client.js';
@@ -15,7 +15,6 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
   let allNews = [];
   let allGallery = [];
   let pendingFile = null;
-  let activePanel = 'overview';
 
   const PANEL_INFO = {
     overview:    { title: 'Dashboard Overview', subtitle: "Welcome back! Here's what's happening with your platform." },
@@ -31,7 +30,6 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
   const toastContainer = document.getElementById('admin-toast-container');
 
   function showToast(type, title, msg) {
-    if (!toastContainer) return;
     const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-times-circle' : 'fa-info-circle';
     const toast = document.createElement('div');
     toast.className = 'admin-toast ' + type;
@@ -75,20 +73,14 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
     }
   }
 
-  if (confirmDeleteBtn) {
-    confirmDeleteBtn.addEventListener('click', function () {
-      confirmDeleteBtn.disabled = true;
-      closeConfirm(true);
-    });
-  }
-  if (confirmCancelBtn) {
-    confirmCancelBtn.addEventListener('click', function () { closeConfirm(false); });
-  }
-  if (confirmOverlay) {
-    confirmOverlay.addEventListener('click', function (e) {
-      if (e.target === confirmOverlay) closeConfirm(false);
-    });
-  }
+  confirmDeleteBtn.addEventListener('click', function () {
+    confirmDeleteBtn.disabled = true;
+    closeConfirm(true);
+  });
+  confirmCancelBtn.addEventListener('click', function () { closeConfirm(false); });
+  confirmOverlay.addEventListener('click', function (e) {
+    if (e.target === confirmOverlay) closeConfirm(false);
+  });
 
   // ============================================================
   // DOM ELEMENTS
@@ -126,18 +118,17 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
   }
 
   function showLogin() {
-    if (loginView) loginView.style.display = 'flex';
-    if (dashboardView) dashboardView.style.display = 'none';
+    loginView.style.display = 'flex';
+    dashboardView.style.display = 'none';
   }
 
   function showDashboard(user) {
-    if (loginView) loginView.style.display = 'none';
-    if (dashboardView) dashboardView.style.display = 'block';
-    if (user && user.email && userEmailEl) {
+    loginView.style.display = 'none';
+    dashboardView.style.display = 'block';
+    if (user && user.email) {
       userEmailEl.innerHTML = '<i class="fas fa-user-circle"></i> ' + escapeHtml(user.email);
     }
     loadOverview();
-    setupRealtime();
   }
 
   if (loginForm) {
@@ -187,18 +178,13 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
   }
 
   function showLoginFeedback(type, message) {
-    if (!loginFeedback) return;
     loginFeedback.className = 'admin-login-feedback ' + type;
     loginFeedback.innerHTML = '<i class="fas ' + (type === 'error-state' ? 'fa-exclamation-circle' : 'fa-check-circle') + '"></i> ' + message;
   }
 
   if (logoutBtn) {
     logoutBtn.addEventListener('click', async function () {
-      try {
-        await supabase.auth.signOut();
-      } catch (err) {
-        console.error('[Admin] Sign out error:', err.message);
-      }
+      await supabase.auth.signOut();
       showLogin();
     });
   }
@@ -208,7 +194,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       if (event === 'SIGNED_OUT' || !session) {
         showLogin();
       } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        if (dashboardView && dashboardView.style.display === 'none') {
+        if (dashboardView.style.display === 'none') {
           showDashboard(session.user);
         }
       }
@@ -221,14 +207,12 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
   navItems.forEach(function (item) {
     item.addEventListener('click', function () {
       const panel = item.dataset.panel;
-      activePanel = panel;
       navItems.forEach(function (n) { n.classList.remove('active'); });
       item.classList.add('active');
       panels.forEach(function (p) { p.classList.remove('active'); });
-      var targetPanel = document.getElementById('panel-' + panel);
-      if (targetPanel) targetPanel.classList.add('active');
-      if (panelTitle) panelTitle.textContent = PANEL_INFO[panel].title;
-      if (panelSubtitle) panelSubtitle.textContent = PANEL_INFO[panel].subtitle;
+      document.getElementById('panel-' + panel).classList.add('active');
+      panelTitle.textContent = PANEL_INFO[panel].title;
+      panelSubtitle.textContent = PANEL_INFO[panel].subtitle;
 
       closeSidebar();
 
@@ -250,58 +234,8 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
     sidebarBackdrop.addEventListener('click', closeSidebar);
   }
   function closeSidebar() {
-    if (sidebar) sidebar.classList.remove('open');
-    if (sidebarBackdrop) sidebarBackdrop.classList.remove('show');
-  }
-
-  // ============================================================
-  // REALTIME SUBSCRIPTIONS
-  // ============================================================
-  let realtimeSetup = false;
-
-  function setupRealtime() {
-    if (realtimeSetup) return;
-    realtimeSetup = true;
-
-    // News articles — refresh admin table + overview on any change
-    supabase
-      .channel('admin-news')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'news_articles' }, function () {
-        console.log('[Realtime] News article changed');
-        if (activePanel === 'news') loadNews();
-        loadOverview();
-      })
-      .subscribe();
-
-    // Gallery images — refresh admin grid + overview on any change
-    supabase
-      .channel('admin-gallery')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'gallery_images' }, function () {
-        console.log('[Realtime] Gallery image changed');
-        if (activePanel === 'gallery') loadGallery();
-        loadOverview();
-      })
-      .subscribe();
-
-    // Newsletter subscribers — refresh admin table + overview on any change
-    supabase
-      .channel('admin-subscribers')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'newsletter_subscribers' }, function () {
-        console.log('[Realtime] Subscriber changed');
-        if (activePanel === 'subscribers') loadSubscribers();
-        loadOverview();
-      })
-      .subscribe();
-
-    // Donations — refresh admin table + overview on any change
-    supabase
-      .channel('admin-donations')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'donations' }, function () {
-        console.log('[Realtime] Donation changed');
-        if (activePanel === 'donations') loadDonations();
-        loadOverview();
-      })
-      .subscribe();
+    sidebar.classList.remove('open');
+    sidebarBackdrop.classList.remove('show');
   }
 
   // ============================================================
@@ -318,21 +252,20 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       ]);
 
       const donationsData = donationsRes.data || [];
-      const donationCount = donationsRes.count !== null ? donationsRes.count : donationsData.length;
+      const donationCount = donationsRes.count || donationsData.length;
       const uniqueDonors = new Set(donationsData.map(function (d) { return d.email || d.donor_name; }).filter(Boolean)).size;
 
-      setStat('stat-donations', donationCount);
-      setStat('stat-donors', uniqueDonors);
-      setStat('stat-subscribers', subscribersRes.count || 0);
-      setStat('stat-gallery', galleryRes.count || 0);
-      setStat('stat-news', newsRes.count || 0);
+      document.getElementById('stat-donations').textContent = donationCount.toLocaleString();
+      document.getElementById('stat-donors').textContent = uniqueDonors.toLocaleString();
+      document.getElementById('stat-subscribers').textContent = subscribersRes.count || 0;
+      document.getElementById('stat-gallery').textContent = galleryRes.count || 0;
+      document.getElementById('stat-news').textContent = newsRes.count || 0;
 
       const recent = donationsData.slice().sort(function (a, b) {
         return new Date(b.created_at) - new Date(a.created_at);
       }).slice(0, 5);
 
       const tbody = document.getElementById('overview-recent-donations');
-      if (!tbody) return;
       if (!recent.length) {
         tbody.innerHTML = '<tr><td colspan="4" class="admin-empty-state"><i class="fas fa-inbox"></i><p>No donations yet</p></td></tr>';
       } else {
@@ -344,11 +277,6 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       console.error('[Admin] Overview error:', err.message);
       showToast('error', 'Failed to load', 'Could not load overview data.');
     }
-  }
-
-  function setStat(id, value) {
-    var el = document.getElementById(id);
-    if (el) el.textContent = Number(value).toLocaleString();
   }
 
   function showSkeletonStats() {
@@ -364,7 +292,6 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
   // ============================================================
   async function loadDonations() {
     const tbody = document.getElementById('donations-table-body');
-    if (!tbody) return;
     tbody.innerHTML = skeletonRows(6, 6);
     try {
       const { data, error } = await supabase
@@ -385,17 +312,14 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
   function updateDonationSummary() {
     const total = allDonations.reduce(function (sum, d) { return sum + parseFloat(d.amount); }, 0);
     const uniqueDonors = new Set(allDonations.map(function (d) { return d.email || d.donor_name; }).filter(Boolean)).size;
-    setStat('donations-total', total.toLocaleString(undefined, { maximumFractionDigits: 2 }));
-    setStat('donors-total', uniqueDonors);
+    document.getElementById('donations-total').textContent = total.toLocaleString(undefined, { maximumFractionDigits: 2 });
+    document.getElementById('donors-total').textContent = uniqueDonors.toLocaleString();
   }
 
   function renderDonations() {
-    const searchEl = document.getElementById('donations-search');
-    const currencyEl = document.getElementById('donations-currency-filter');
-    const sortEl = document.getElementById('donations-sort');
-    const search = (searchEl ? searchEl.value : '').toLowerCase();
-    const currencyFilter = currencyEl ? currencyEl.value : '';
-    const sortBy = sortEl ? sortEl.value : 'recent';
+    const search = (document.getElementById('donations-search')?.value || '').toLowerCase();
+    const currencyFilter = document.getElementById('donations-currency-filter')?.value || '';
+    const sortBy = document.getElementById('donations-sort')?.value || 'recent';
 
     let filtered = allDonations.filter(function (d) {
       const matchesSearch = !search ||
@@ -414,7 +338,6 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
     }
 
     const tbody = document.getElementById('donations-table-body');
-    if (!tbody) return;
     if (!filtered.length) {
       tbody.innerHTML = '<tr><td colspan="6" class="admin-empty-state"><i class="fas fa-inbox"></i><p>No donations found</p></td></tr>';
       return;
@@ -432,41 +355,34 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
     }).join('');
   }
 
-  var donationsSearchEl = document.getElementById('donations-search');
-  if (donationsSearchEl) donationsSearchEl.addEventListener('input', renderDonations);
-  var donationsCurrencyEl = document.getElementById('donations-currency-filter');
-  if (donationsCurrencyEl) donationsCurrencyEl.addEventListener('change', renderDonations);
-  var donationsSortEl = document.getElementById('donations-sort');
-  if (donationsSortEl) donationsSortEl.addEventListener('change', renderDonations);
+  document.getElementById('donations-search')?.addEventListener('input', renderDonations);
+  document.getElementById('donations-currency-filter')?.addEventListener('change', renderDonations);
+  document.getElementById('donations-sort')?.addEventListener('change', renderDonations);
 
-  var donationsExportBtn = document.getElementById('donations-export-btn');
-  if (donationsExportBtn) {
-    donationsExportBtn.addEventListener('click', function () {
-      if (!allDonations.length) {
-        showToast('info', 'No data', 'There are no donations to export.');
-        return;
-      }
-      var csv = ['Donor Name,Email,Amount,Currency,Payment Status,Transaction Date'];
-      allDonations.forEach(function (d) {
-        csv.push([
-          csvEscape(d.donor_name || 'Anonymous'),
-          csvEscape(d.email || ''),
-          d.amount,
-          d.currency,
-          csvEscape(d.payment_status),
-          new Date(d.created_at).toISOString()
-        ].join(','));
-      });
-      downloadCSV(csv.join('\n'), 'donations');
+  document.getElementById('donations-export-btn')?.addEventListener('click', function () {
+    if (!allDonations.length) {
+      showToast('info', 'No data', 'There are no donations to export.');
+      return;
+    }
+    var csv = ['Donor Name,Email,Amount,Currency,Payment Status,Transaction Date'];
+    allDonations.forEach(function (d) {
+      csv.push([
+        csvEscape(d.donor_name || 'Anonymous'),
+        csvEscape(d.email || ''),
+        d.amount,
+        d.currency,
+        csvEscape(d.payment_status),
+        new Date(d.created_at).toISOString()
+      ].join(','));
     });
-  }
+    downloadCSV(csv.join('\n'), 'donations');
+  });
 
   // ============================================================
   // NEWS
   // ============================================================
   async function loadNews() {
     const tbody = document.getElementById('news-table-body');
-    if (!tbody) return;
     tbody.innerHTML = skeletonRows(3, 4);
     try {
       const { data, error } = await supabase
@@ -485,7 +401,6 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
 
   function renderNews() {
     const tbody = document.getElementById('news-table-body');
-    if (!tbody) return;
     if (!allNews.length) {
       tbody.innerHTML = '<tr><td colspan="4" class="admin-empty-state"><i class="fas fa-newspaper"></i><p>No articles yet. Click "Add Article" to create one.</p></td></tr>';
       return;
@@ -527,11 +442,9 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
   function openNewsModal(id) {
     const form = document.getElementById('news-form');
     const feedback = document.getElementById('news-form-feedback');
-    if (feedback) {
-      feedback.className = '';
-      feedback.style.display = 'none';
-    }
-    if (form) form.reset();
+    feedback.className = '';
+    feedback.style.display = 'none';
+    form.reset();
 
     if (id) {
       const article = allNews.find(function (a) { return a.id === id; });
@@ -547,96 +460,70 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       document.getElementById('news-id').value = '';
     }
 
-    if (newsModal) newsModal.classList.add('open');
+    newsModal.classList.add('open');
   }
 
-  var newsSaveBtn = document.getElementById('news-save-btn');
-  if (newsSaveBtn) {
-    newsSaveBtn.addEventListener('click', async function () {
-      const id = document.getElementById('news-id').value;
-      const title = document.getElementById('news-title-input').value.trim();
-      const summary = document.getElementById('news-summary-input').value.trim();
-      const content = document.getElementById('news-content-input').value.trim();
-      const status = document.getElementById('news-status-input').value;
-      const feedback = document.getElementById('news-form-feedback');
-      const saveBtn = document.getElementById('news-save-btn');
+  document.getElementById('news-save-btn')?.addEventListener('click', async function () {
+    const id = document.getElementById('news-id').value;
+    const title = document.getElementById('news-title-input').value.trim();
+    const summary = document.getElementById('news-summary-input').value.trim();
+    const content = document.getElementById('news-content-input').value.trim();
+    const status = document.getElementById('news-status-input').value;
+    const feedback = document.getElementById('news-form-feedback');
+    const saveBtn = document.getElementById('news-save-btn');
 
-      if (!title || !summary || !content) {
-        if (feedback) {
-          feedback.className = 'admin-login-feedback error-state';
-          feedback.innerHTML = '<i class="fas fa-exclamation-circle"></i> Title, preview, and content are all required.';
-        }
-        return;
+    if (!title || !summary || !content) {
+      feedback.className = 'admin-login-feedback error-state';
+      feedback.innerHTML = '<i class="fas fa-exclamation-circle"></i> Title, preview, and content are all required.';
+      return;
+    }
+
+    const originalText = saveBtn.innerHTML;
+    saveBtn.innerHTML = '<span class="spinner"></span> Saving...';
+    saveBtn.disabled = true;
+
+    const payload = {
+      title: title,
+      summary: summary,
+      content: content,
+      status: status,
+      published_at: status === 'published' ? new Date().toISOString() : null
+    };
+
+    try {
+      if (id) {
+        const { error } = await supabase.from('news_articles').update(payload).eq('id', id);
+        if (error) throw error;
+        showToast('success', 'Article updated', '"' + title + '" has been saved.');
+      } else {
+        const { error } = await supabase.from('news_articles').insert([payload]);
+        if (error) throw error;
+        showToast('success', 'Article created', '"' + title + '" has been added.');
       }
-
-      const originalText = saveBtn.innerHTML;
-      saveBtn.innerHTML = '<span class="spinner"></span> Saving...';
-      saveBtn.disabled = true;
-
-      try {
-        if (id) {
-          // EDIT: only set published_at if publishing for the first time
-          var existing = allNews.find(function (a) { return a.id === id; });
-          var payload = {
-            title: title,
-            summary: summary,
-            content: content,
-            status: status
-          };
-          if (status === 'published' && !existing.published_at) {
-            payload.published_at = new Date().toISOString();
-          } else if (status === 'draft') {
-            payload.published_at = null;
-          }
-
-          const { error } = await supabase.from('news_articles').update(payload).eq('id', id);
-          if (error) throw error;
-          showToast('success', 'Article updated', '"' + title + '" has been saved.');
-        } else {
-          var newPayload = {
-            title: title,
-            summary: summary,
-            content: content,
-            status: status,
-            published_at: status === 'published' ? new Date().toISOString() : null
-          };
-          const { error } = await supabase.from('news_articles').insert([newPayload]);
-          if (error) throw error;
-          showToast('success', 'Article created', '"' + title + '" has been added.');
-        }
-        if (newsModal) newsModal.classList.remove('open');
-        // Realtime will trigger loadNews, but also call directly for immediate feedback
-        loadNews();
-        loadOverview();
-      } catch (err) {
-        console.error('[Admin] News save error:', err.message);
-        if (feedback) {
-          feedback.className = 'admin-login-feedback error-state';
-          feedback.innerHTML = '<i class="fas fa-exclamation-circle"></i> Failed to save: ' + err.message;
-        }
-      } finally {
-        saveBtn.innerHTML = originalText;
-        saveBtn.disabled = false;
-      }
-    });
-  }
+      newsModal.classList.remove('open');
+      loadNews();
+    } catch (err) {
+      feedback.className = 'admin-login-feedback error-state';
+      feedback.innerHTML = '<i class="fas fa-exclamation-circle"></i> Failed to save: ' + err.message;
+    } finally {
+      saveBtn.innerHTML = originalText;
+      saveBtn.disabled = false;
+    }
+  });
 
   async function toggleNewsPublish(id) {
     const article = allNews.find(function (a) { return a.id === id; });
     if (!article) return;
     const newStatus = article.status === 'published' ? 'draft' : 'published';
     try {
-      var payload = {
+      const { error } = await supabase.from('news_articles').update({
         status: newStatus,
-        published_at: newStatus === 'published' ? (article.published_at || new Date().toISOString()) : null
-      };
-      const { error } = await supabase.from('news_articles').update(payload).eq('id', id);
+        published_at: newStatus === 'published' ? new Date().toISOString() : null
+      }).eq('id', id);
       if (error) throw error;
       showToast('success', newStatus === 'published' ? 'Article published' : 'Article unpublished', '"' + article.title + '" is now ' + newStatus + '.');
       loadNews();
-      loadOverview();
     } catch (err) {
-      console.error('[Admin] News toggle error:', err.message);
       showToast('error', 'Update failed', err.message);
     }
   }
@@ -651,9 +538,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       if (error) throw error;
       showToast('success', 'Article deleted', '"' + article.title + '" has been removed.');
       loadNews();
-      loadOverview();
     } catch (err) {
-      console.error('[Admin] News delete error:', err.message);
       showToast('error', 'Delete failed', err.message);
     }
   }
@@ -663,7 +548,6 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
   // ============================================================
   async function loadGallery() {
     const grid = document.getElementById('admin-gallery-grid');
-    if (!grid) return;
     grid.innerHTML = '<div class="admin-empty-state" style="grid-column: 1/-1;"><p>Loading gallery...</p></div>';
     try {
       const { data, error } = await supabase
@@ -682,7 +566,6 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
 
   function renderGallery() {
     const grid = document.getElementById('admin-gallery-grid');
-    if (!grid) return;
     if (!allGallery.length) {
       grid.innerHTML = '<div class="admin-empty-state" style="grid-column: 1/-1;"><i class="fas fa-images"></i><p>No images yet. Click "Upload Image" to add one.</p></div>';
       return;
@@ -706,23 +589,18 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
         const confirmed = await showConfirm('Delete Image', 'Are you sure you want to delete this image? It will be permanently removed.', 'Delete Image');
         if (!confirmed) return;
         try {
-          // Delete from Storage first if it's a Supabase-hosted image
-          if (img.image_url && img.image_url.indexOf(STORAGE_BUCKET) !== -1) {
-            var parts = img.image_url.split('/' + STORAGE_BUCKET + '/');
-            if (parts.length > 1 && parts[1]) {
-              var path = parts[1];
+          if (img.image_url && img.image_url.includes(STORAGE_BUCKET)) {
+            const path = img.image_url.split('/' + STORAGE_BUCKET + '/')[1];
+            if (path) {
               const { error: storageError } = await supabase.storage.from(STORAGE_BUCKET).remove([path]);
               if (storageError) console.warn('[Admin] Storage delete warning:', storageError.message);
             }
           }
-          // Delete from database
           const { error } = await supabase.from('gallery_images').delete().eq('id', id);
           if (error) throw error;
           showToast('success', 'Image deleted', 'The image has been removed from gallery and storage.');
           loadGallery();
-          loadOverview();
         } catch (err) {
-          console.error('[Admin] Gallery delete error:', err.message);
           showToast('error', 'Delete failed', err.message);
         }
       });
@@ -739,26 +617,18 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
   if (galleryUploadBtn) {
     galleryUploadBtn.addEventListener('click', function () {
       pendingFile = null;
-      if (galleryPreview) {
-        galleryPreview.style.display = 'none';
-        galleryPreview.src = '';
-      }
-      var gForm = document.getElementById('gallery-form');
-      if (gForm) gForm.reset();
-      var gFeedback = document.getElementById('gallery-form-feedback');
-      if (gFeedback) {
-        gFeedback.className = '';
-        gFeedback.style.display = 'none';
-      }
-      var gProgress = document.getElementById('gallery-progress');
-      if (gProgress) gProgress.style.display = 'none';
-      var gProgressBar = document.getElementById('gallery-progress-bar');
-      if (gProgressBar) gProgressBar.style.width = '0';
-      if (galleryModal) galleryModal.classList.add('open');
+      galleryPreview.style.display = 'none';
+      galleryPreview.src = '';
+      document.getElementById('gallery-form').reset();
+      document.getElementById('gallery-form-feedback').className = '';
+      document.getElementById('gallery-form-feedback').style.display = 'none';
+      document.getElementById('gallery-progress').style.display = 'none';
+      document.getElementById('gallery-progress-bar').style.width = '0';
+      galleryModal.classList.add('open');
     });
   }
 
-  if (galleryDropArea && galleryFileInput) {
+  if (galleryDropArea) {
     galleryDropArea.addEventListener('click', function () { galleryFileInput.click(); });
     galleryDropArea.addEventListener('dragover', function (e) {
       e.preventDefault();
@@ -790,87 +660,76 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
     pendingFile = file;
     const reader = new FileReader();
     reader.onload = function (e) {
-      if (galleryPreview) {
-        galleryPreview.src = e.target.result;
-        galleryPreview.style.display = 'block';
-      }
+      galleryPreview.src = e.target.result;
+      galleryPreview.style.display = 'block';
     };
     reader.readAsDataURL(file);
   }
 
   function showGalleryFeedback(type, message) {
     const fb = document.getElementById('gallery-form-feedback');
-    if (!fb) return;
     fb.className = 'admin-login-feedback ' + type;
     fb.innerHTML = '<i class="fas ' + (type === 'error-state' ? 'fa-exclamation-circle' : 'fa-check-circle') + '"></i> ' + message;
   }
 
-  var galleryUploadConfirm = document.getElementById('gallery-upload-confirm');
-  if (galleryUploadConfirm) {
-    galleryUploadConfirm.addEventListener('click', async function () {
-      if (!pendingFile) {
-        showGalleryFeedback('error-state', 'Please select an image to upload.');
-        return;
-      }
+  document.getElementById('gallery-upload-confirm')?.addEventListener('click', async function () {
+    if (!pendingFile) {
+      showGalleryFeedback('error-state', 'Please select an image to upload.');
+      return;
+    }
 
-      const caption = document.getElementById('gallery-caption').value.trim();
-      const category = document.getElementById('gallery-category').value;
-      const uploadBtn = document.getElementById('gallery-upload-confirm');
+    const caption = document.getElementById('gallery-caption').value.trim();
+    const category = document.getElementById('gallery-category').value;
+    const uploadBtn = document.getElementById('gallery-upload-confirm');
 
-      const filePath = 'gallery/' + Date.now() + '-' + pendingFile.name.replace(/[^a-zA-Z0-9.\-]/g, '_');
+    const filePath = 'gallery/' + Date.now() + '-' + pendingFile.name.replace(/[^a-zA-Z0-9.\-]/g, '_');
 
-      uploadBtn.innerHTML = '<span class="spinner"></span> Uploading...';
-      uploadBtn.disabled = true;
-      var gProgress = document.getElementById('gallery-progress');
-      if (gProgress) gProgress.style.display = 'block';
+    uploadBtn.innerHTML = '<span class="spinner"></span> Uploading...';
+    uploadBtn.disabled = true;
+    document.getElementById('gallery-progress').style.display = 'block';
 
-      try {
-        const { error: uploadError } = await supabase.storage
-          .from(STORAGE_BUCKET)
-          .upload(filePath, pendingFile, {
-            cacheControl: '3600',
-            upsert: false,
-            contentType: pendingFile.type
-          });
+    try {
+      const { error: uploadError } = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .upload(filePath, pendingFile, {
+          cacheControl: '3600',
+          upsert: false,
+          contentType: pendingFile.type
+        });
 
-        if (uploadError) throw uploadError;
+      if (uploadError) throw uploadError;
 
-        var gProgressBar = document.getElementById('gallery-progress-bar');
-        if (gProgressBar) gProgressBar.style.width = '80%';
+      document.getElementById('gallery-progress-bar').style.width = '80%';
 
-        const { data: urlData } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(filePath);
-        const imageUrl = urlData.publicUrl;
+      const { data: urlData } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(filePath);
+      const imageUrl = urlData.publicUrl;
 
-        const { error: dbError } = await supabase.from('gallery_images').insert([{
-          image_url: imageUrl,
-          caption: caption || null,
-          category: category
-        }]);
+      const { error: dbError } = await supabase.from('gallery_images').insert([{
+        image_url: imageUrl,
+        caption: caption || null,
+        category: category
+      }]);
 
-        if (dbError) throw dbError;
+      if (dbError) throw dbError;
 
-        if (gProgressBar) gProgressBar.style.width = '100%';
+      document.getElementById('gallery-progress-bar').style.width = '100%';
 
-        showToast('success', 'Image uploaded', 'The image has been added to the gallery.');
-        if (galleryModal) galleryModal.classList.remove('open');
-        loadGallery();
-        loadOverview();
-      } catch (err) {
-        console.error('[Admin] Gallery upload error:', err.message);
-        showGalleryFeedback('error-state', 'Upload failed: ' + err.message);
-      } finally {
-        uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Upload';
-        uploadBtn.disabled = false;
-      }
-    });
-  }
+      showToast('success', 'Image uploaded', 'The image has been added to the gallery.');
+      galleryModal.classList.remove('open');
+      loadGallery();
+    } catch (err) {
+      showGalleryFeedback('error-state', 'Upload failed: ' + err.message);
+    } finally {
+      uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Upload';
+      uploadBtn.disabled = false;
+    }
+  });
 
   // ============================================================
   // SUBSCRIBERS
   // ============================================================
   async function loadSubscribers() {
     const tbody = document.getElementById('subscribers-table-body');
-    if (!tbody) return;
     tbody.innerHTML = skeletonRows(3, 3);
     try {
       const { data, error } = await supabase
@@ -888,10 +747,8 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
   }
 
   function renderSubscribers() {
-    const searchEl = document.getElementById('subscribers-search');
+    const search = (document.getElementById('subscribers-search')?.value || '').toLowerCase();
     const tbody = document.getElementById('subscribers-table-body');
-    if (!tbody) return;
-    const search = (searchEl ? searchEl.value : '').toLowerCase();
 
     const filtered = allSubscribers.filter(function (s) {
       return !search ||
@@ -909,35 +766,30 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
     }).join('');
   }
 
-  var subscribersSearchEl = document.getElementById('subscribers-search');
-  if (subscribersSearchEl) subscribersSearchEl.addEventListener('input', renderSubscribers);
+  document.getElementById('subscribers-search')?.addEventListener('input', renderSubscribers);
 
-  var exportCsvBtn = document.getElementById('export-csv-btn');
-  if (exportCsvBtn) {
-    exportCsvBtn.addEventListener('click', function () {
-      if (!allSubscribers.length) {
-        showToast('info', 'No data', 'There are no subscribers to export.');
-        return;
-      }
-      var csv = ['First Name,Email,Date Joined'];
-      allSubscribers.forEach(function (s) {
-        csv.push([
-          csvEscape(s.first_name),
-          csvEscape(s.email),
-          new Date(s.subscribed_at).toISOString()
-        ].join(','));
-      });
-      downloadCSV(csv.join('\n'), 'newsletter-subscribers');
+  document.getElementById('export-csv-btn')?.addEventListener('click', function () {
+    if (!allSubscribers.length) {
+      showToast('info', 'No data', 'There are no subscribers to export.');
+      return;
+    }
+    var csv = ['First Name,Email,Date Joined'];
+    allSubscribers.forEach(function (s) {
+      csv.push([
+        csvEscape(s.first_name),
+        csvEscape(s.email),
+        new Date(s.subscribed_at).toISOString()
+      ].join(','));
     });
-  }
+    downloadCSV(csv.join('\n'), 'newsletter-subscribers');
+  });
 
   // ============================================================
   // MODAL CLOSE HANDLERS
   // ============================================================
   document.querySelectorAll('[data-close-modal]').forEach(function (btn) {
     btn.addEventListener('click', function () {
-      var modal = document.getElementById(btn.dataset.closeModal);
-      if (modal) modal.classList.remove('open');
+      document.getElementById(btn.dataset.closeModal).classList.remove('open');
     });
   });
 
@@ -950,7 +802,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
       document.querySelectorAll('.admin-modal-overlay.open').forEach(function (m) { m.classList.remove('open'); });
-      if (confirmOverlay && confirmOverlay.classList.contains('open')) closeConfirm(false);
+      if (confirmOverlay.classList.contains('open')) closeConfirm(false);
     }
   });
 
@@ -976,7 +828,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
 
   function csvEscape(str) {
     if (!str) return '';
-    if (str.indexOf(',') !== -1 || str.indexOf('"') !== -1 || str.indexOf('\n') !== -1) {
+    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
       return '"' + str.replace(/"/g, '""') + '"';
     }
     return str;
