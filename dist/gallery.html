@@ -13,11 +13,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <script type="module" crossorigin src="/assets/gallery-BU9PsYnL.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/styles-BkgZ32aD.js">
-  <link rel="modulepreload" crossorigin href="/assets/cursor-BKEpJxUd.js">
-  <link rel="modulepreload" crossorigin href="/assets/gallery-Wloo2J9S.js">
-  <link rel="modulepreload" crossorigin href="/assets/supabase-client-CDcWUE7U.js">
+  <script type="module" crossorigin src="/assets/styles-BkgZ32aD.js"></script>
+  <script type="module" crossorigin src="/assets/cursor-BKEpJxUd.js"></script>
+  <script type="module" crossorigin src="/assets/supabase-client-CDcWUE7U.js"></script>
+  <script type="module" crossorigin src="/assets/gallery-CPyT8scY.js"></script>
   <link rel="stylesheet" crossorigin href="/assets/styles-CLjVZABY.css">
   <link rel="stylesheet" crossorigin href="/assets/cursor-DNgKRdBn.css">
 </head>
@@ -77,6 +76,7 @@
         <button class="filter-btn" data-filter="outreach" aria-pressed="false">Outreach Programs</button>
         <button class="filter-btn" data-filter="education" aria-pressed="false">Education Sessions</button>
         <button class="filter-btn" data-filter="community" aria-pressed="false">Community Events</button>
+        <button class="filter-btn" data-filter="events" aria-pressed="false">Special Events</button>
       </div>
 
       <!-- Mobile hint -->
@@ -84,41 +84,10 @@
         <i class="fas fa-hand-pointer"></i> Tap any photo to browse full-screen
       </div>
 
-      <!-- Gallery Grid -->
+      <!-- Gallery Grid — populated dynamically from Supabase by gallery.js -->
       <div class="masonry-grid stagger reveal" id="masonry-grid" role="list" aria-label="Photo gallery">
-        <div class="masonry-item reveal" data-category="outreach" data-lightbox="images/hero/Padupfoundation-4.jpg" role="listitem" tabindex="0" aria-label="View: Girls celebrating at outreach">
-          <img src="images/hero/Padupfoundation-4.jpg" alt="Girls celebrating as they receive sanitary pads" loading="lazy" />
-          <div class="masonry-item-overlay"><i class="fas fa-expand" aria-hidden="true"></i></div>
-        </div>
-
-        <div class="masonry-item reveal" data-category="education" data-lightbox="images/hero/Padupfoundation-3.jpg" role="listitem" tabindex="0" aria-label="View: Classroom education session">
-          <img src="images/hero/Padupfoundation-3.jpg" alt="Student presenting during menstrual health class" loading="lazy" />
-          <div class="masonry-item-overlay"><i class="fas fa-expand" aria-hidden="true"></i></div>
-        </div>
-
-        <div class="masonry-item reveal" data-category="community" data-lightbox="images/outreach/Padupfoundation-2.jpg" role="listitem" tabindex="0" aria-label="View: Community awareness event">
-          <img src="images/outreach/Padupfoundation-2.jpg" alt="Students holding awareness signs at community event" loading="lazy" />
-          <div class="masonry-item-overlay"><i class="fas fa-expand" aria-hidden="true"></i></div>
-        </div>
-
-        <div class="masonry-item reveal" data-category="outreach" data-lightbox="images/gallery/Padupfoundation-1.jpg" role="listitem" tabindex="0" aria-label="View: Volunteer sharing pads">
-          <img src="images/gallery/Padupfoundation-1.jpg" alt="Volunteer sharing sanitary products with students" loading="lazy" />
-          <div class="masonry-item-overlay"><i class="fas fa-expand" aria-hidden="true"></i></div>
-        </div>
-
-        <div class="masonry-item reveal" data-category="community" data-lightbox="images/gallery/Padupfoundation-5.jpg" role="listitem" tabindex="0" aria-label="View: Students celebrating with donated pads">
-          <img src="images/gallery/Padupfoundation-5.jpg" alt="Students joyfully celebrating after receiving sanitary products" loading="lazy" />
-          <div class="masonry-item-overlay"><i class="fas fa-expand" aria-hidden="true"></i></div>
-        </div>
-
-        <div class="masonry-item reveal" data-category="outreach" data-lightbox="images/gallery/Padupfoundation-6.jpg" role="listitem" tabindex="0" aria-label="View: Students holding awareness signs">
-          <img src="images/gallery/Padupfoundation-6.jpg" alt="Students holding Donate a Pad and No More Stigma awareness signs" loading="lazy" />
-          <div class="masonry-item-overlay"><i class="fas fa-expand" aria-hidden="true"></i></div>
-        </div>
-
-        <div class="masonry-item reveal" data-category="outreach" data-lightbox="images/gallery/Padupfoundation-7.jpg" role="listitem" tabindex="0" aria-label="View: Volunteer with school children">
-          <img src="images/gallery/Padupfoundation-7.jpg" alt="Pad Up Foundation volunteer with school children during outreach" loading="lazy" />
-          <div class="masonry-item-overlay"><i class="fas fa-expand" aria-hidden="true"></i></div>
+        <div class="admin-empty-state" style="grid-column: 1/-1;">
+          <p style="color: var(--gray-400);"><i class="fas fa-spinner fa-spin"></i> Loading gallery...</p>
         </div>
       </div>
     </div>
