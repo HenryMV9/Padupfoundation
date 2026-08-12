@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <script type="module" crossorigin src="/assets/admin-DvNON5Kf.js"></script>
+  <script type="module" crossorigin src="/assets/admin-UqkHm1uZ.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/styles-BkgZ32aD.js">
   <link rel="modulepreload" crossorigin href="/assets/supabase-client-CDcWUE7U.js">
   <link rel="stylesheet" crossorigin href="/assets/styles-CLjVZABY.css">
@@ -228,7 +228,10 @@
           <div class="admin-card">
             <div class="admin-card-header">
               <h2>Newsletter Subscribers</h2>
-              <button class="btn-outline btn-sm" id="export-csv-btn"><i class="fas fa-download"></i> Export CSV</button>
+              <div style="display:flex;gap:0.5rem;">
+                <button class="btn-outline btn-sm" id="brevo-sync-btn"><i class="fas fa-sync"></i> Sync to Brevo</button>
+                <button class="btn-outline btn-sm" id="export-csv-btn"><i class="fas fa-download"></i> Export CSV</button>
+              </div>
             </div>
             <div class="admin-search-bar">
               <input type="text" class="admin-search-input" id="subscribers-search" placeholder="Search by name or email..." />
@@ -236,10 +239,10 @@
             <div class="admin-table-wrap">
               <table class="admin-table">
                 <thead>
-                  <tr><th>Name</th><th>Email</th><th>Date Joined</th></tr>
+                  <tr><th>Name</th><th>Email</th><th>Date Joined</th><th>Brevo</th></tr>
                 </thead>
                 <tbody id="subscribers-table-body">
-                  <tr><td colspan="3" class="admin-empty-state"><p>Loading...</p></td></tr>
+                  <tr><td colspan="4" class="admin-empty-state"><p>Loading...</p></td></tr>
                 </tbody>
               </table>
             </div>
