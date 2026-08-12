@@ -1,12 +1,11 @@
 /* ============================================================
    PAD UP FOUNDATION - Brevo Email Marketing Sync
    Edge function that syncs newsletter subscribers to Brevo.
-   Modular: API key is stored as a Supabase secret (BREVO_API_KEY).
-   Called automatically or manually to sync all subscribers.
+   API key is stored as a Supabase secret (BREVO_API_KEY).
 
    Endpoints:
-   POST /sync  — sync a single subscriber to Brevo
-   POST /sync-all — sync all subscribers from database
+   POST /sync      — sync a single subscriber to Brevo (called after signup)
+   POST /sync-all  — batch sync all unsynced subscribers from database
    ============================================================ */
 
 import { createClient } from "npm:@supabase/supabase-js@2.45.0";
@@ -18,11 +17,11 @@ const corsHeaders = {
 };
 
 const BREVO_API_URL = "https://api.brevo.com/v3/contacts";
-const BREVO_LIST_ID = null; // Set via BREVO_LIST_ID secret if needed
+const BREVO_BATCH_URL = "https://api.brevo.com/v3/contacts/import";
 
-function jsonResponse(status, body) {
+function jsonResponse(status: number, body: Record<string, unknown>) {
   return new Response(JSON.stringify(body), {
-    status: status,
+    status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 }
@@ -50,9 +49,14 @@ Deno.serve(async (req: Request) => {
     const action = url.pathname.split("/").pop() || "";
     const body = await req.json().catch(() => ({}));
 
+    /* ---- Single subscriber sync ---- */
     if (action === "sync") {
-      // Sync a single subscriber
-      const { email, first_name } = body;
+      const { email, first_name, subscriber_id } = body as {
+        email?: string;
+        first_name?: string;
+        subscriber_id?: string;
+      };
+
       if (!email) {
         return jsonResponse(400, { error: "Email is required" });
       }
@@ -60,7 +64,7 @@ Deno.serve(async (req: Request) => {
       const brevoBody: Record<string, unknown> = {
         email: email,
         attributes: { FIRSTNAME: first_name || "" },
-        listIds: BREVO_LIST_ID ? [BREVO_LIST_ID] : undefined,
+        listIds: [2],
         updateEnabled: true,
       };
 
@@ -75,35 +79,54 @@ Deno.serve(async (req: Request) => {
 
       if (!brevoRes.ok) {
         const errText = await brevoRes.text();
-        return jsonResponse(brevoRes.status, { error: "Brevo API error", details: errText });
+        console.error("[Brevo] Single sync failed for", email, ":", brevoRes.status, errText);
+        return jsonResponse(brevoRes.status, {
+          error: "Brevo API error",
+          details: errText,
+        });
       }
 
-      return jsonResponse(200, { success: true, message: "Subscriber synced to Brevo" });
+      if (subscriber_id) {
+        await supabase
+          .from("newsletter_subscribers")
+          .update({ brevo_synced: true, brevo_synced_at: new Date().toISOString() })
+          .eq("id", subscriber_id);
+      }
+
+      return jsonResponse(200, {
+        success: true,
+        message: "Subscriber synced to Brevo",
+      });
     }
 
+    /* ---- Batch sync all unsynced subscribers ---- */
     if (action === "sync-all") {
-      // Sync all subscribers from the database
       const { data: subscribers, error: dbError } = await supabase
         .from("newsletter_subscribers")
-        .select("first_name, email");
+        .select("id, first_name, email")
+        .eq("brevo_synced", false);
 
       if (dbError) throw dbError;
 
       if (!subscribers || subscribers.length === 0) {
-        return jsonResponse(200, { success: true, message: "No subscribers to sync", synced: 0 });
+        return jsonResponse(200, {
+          success: true,
+          message: "No unsynced subscribers found",
+          synced: 0,
+        });
       }
 
-      // Brevo batch import
       const batchBody = {
         jsonBody: subscribers.map((s: { email: string; first_name: string }) => ({
           email: s.email,
           attributes: { FIRSTNAME: s.first_name || "" },
+          listIds: [2],
         })),
-        listIds: BREVO_LIST_ID ? [BREVO_LIST_ID] : undefined,
+        listIds: [2],
         updateEnabled: true,
       };
 
-      const brevoRes = await fetch("https://api.brevo.com/v3/contacts/import", {
+      const brevoRes = await fetch(BREVO_BATCH_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -114,14 +137,30 @@ Deno.serve(async (req: Request) => {
 
       if (!brevoRes.ok) {
         const errText = await brevoRes.text();
-        return jsonResponse(brevoRes.status, { error: "Brevo batch import error", details: errText });
+        console.error("[Brevo] Batch sync failed:", brevoRes.status, errText);
+        return jsonResponse(brevoRes.status, {
+          error: "Brevo batch import error",
+          details: errText,
+        });
       }
 
-      return jsonResponse(200, { success: true, message: "Batch sync initiated", count: subscribers.length });
+      const now = new Date().toISOString();
+      const ids = subscribers.map((s: { id: string }) => s.id);
+      await supabase
+        .from("newsletter_subscribers")
+        .update({ brevo_synced: true, brevo_synced_at: now })
+        .in("id", ids);
+
+      return jsonResponse(200, {
+        success: true,
+        message: "Batch sync completed",
+        synced: subscribers.length,
+      });
     }
 
     return jsonResponse(404, { error: "Unknown action. Use /sync or /sync-all." });
   } catch (err) {
+    console.error("[Brevo] Edge function error:", err.message);
     return jsonResponse(500, { error: err.message });
   }
 });

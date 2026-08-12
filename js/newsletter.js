@@ -77,6 +77,27 @@ import { supabase } from './supabase-client.js';
     });
   });
 
+  // Sync subscriber to Brevo via edge function (fire-and-forget)
+  async function syncToBrevo(email, firstName, subscriberId) {
+    try {
+      var apiUrl = (import.meta.env.VITE_SUPABASE_URL || '') + '/functions/v1/brevo-sync/sync';
+      var res = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + (import.meta.env.VITE_SUPABASE_ANON_KEY || '')
+        },
+        body: JSON.stringify({ email: email, first_name: firstName, subscriber_id: subscriberId })
+      });
+      var data = await res.json().catch(function () { return {}; });
+      if (!res.ok) {
+        console.warn('[Newsletter] Brevo sync warning:', data.details || data.error || 'Unknown error');
+      }
+    } catch (err) {
+      console.warn('[Newsletter] Brevo sync failed (non-blocking):', err.message);
+    }
+  }
+
   form.addEventListener('submit', async function (e) {
     e.preventDefault();
     if (!validate()) return;
@@ -91,9 +112,10 @@ import { supabase } from './supabase-client.js';
     feedback.style.display = 'none';
 
     try {
-      const { error } = await supabase
+      const { data: insertData, error } = await supabase
         .from('newsletter_subscribers')
-        .insert([{ first_name: name, email: email }]);
+        .insert([{ first_name: name, email: email }])
+        .select('id');
 
       if (error) {
         if (error.code === '23505') {
@@ -107,6 +129,9 @@ import { supabase } from './supabase-client.js';
         form.reset();
         nameInput.classList.remove('success', 'error');
         emailInput.classList.remove('success', 'error');
+
+        // Sync to Brevo (fire-and-forget)
+        syncToBrevo(email, name, insertData && insertData[0] ? insertData[0].id : null);
       }
     } catch (err) {
       console.error('[Newsletter] Error:', err.message);

@@ -87,10 +87,32 @@ import { supabase } from './supabase-client.js';
     submitBtn.innerHTML = '<span class="spinner"></span> Subscribing...';
     submitBtn.disabled = true;
 
+    async function syncToBrevo(emailAddr, firstName, subscriberId) {
+      try {
+        var apiUrl = (import.meta.env.VITE_SUPABASE_URL || '') + '/functions/v1/brevo-sync/sync';
+        var res = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + (import.meta.env.VITE_SUPABASE_ANON_KEY || '')
+          },
+          body: JSON.stringify({ email: emailAddr, first_name: firstName, subscriber_id: subscriberId })
+        });
+        var data = await res.json().catch(function () { return {}; });
+        if (!res.ok) {
+          console.warn('[Newsletter Popup] Brevo sync warning:', data.details || data.error || 'Unknown error');
+        }
+      } catch (err) {
+        console.warn('[Newsletter Popup] Brevo sync failed (non-blocking):', err.message);
+      }
+    }
+
+
     try {
-      const { error } = await supabase
+      const { data: insertData, error } = await supabase
         .from('newsletter_subscribers')
-        .insert([{ first_name: name, email: email }]);
+        .insert([{ first_name: name, email: email }])
+        .select('id');
 
       if (error && error.code !== '23505') {
         console.error('[Newsletter Popup] Insert error:', error.message, error.details, error.hint);
@@ -103,6 +125,9 @@ import { supabase } from './supabase-client.js';
         setTimeout(closePopup, 2000);
         return;
       }
+
+      // Sync to Brevo (fire-and-forget)
+      syncToBrevo(email, name, insertData && insertData[0] ? insertData[0].id : null);
 
       feedback.className = 'newsletter-popup-feedback success';
       feedback.innerHTML = '<i class="fas fa-check-circle"></i> Welcome aboard, ' + name + '! Check your inbox for updates.';

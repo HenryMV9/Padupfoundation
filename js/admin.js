@@ -884,7 +884,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
   async function loadSubscribers() {
     const tbody = document.getElementById('subscribers-table-body');
     if (!tbody) return;
-    tbody.innerHTML = skeletonRows(3, 3);
+    tbody.innerHTML = skeletonRows(3, 4);
     try {
       const { data, error } = await supabase
         .from('newsletter_subscribers')
@@ -896,7 +896,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       renderSubscribers();
     } catch (err) {
       console.error('[Admin] Subscribers fetch error:', err.message, err.details || '', err.hint || '', err);
-      tbody.innerHTML = '<tr><td colspan="3" class="admin-empty-state"><i class="fas fa-exclamation-circle"></i><p>Failed to load subscribers: ' + err.message + '</p></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="4" class="admin-empty-state"><i class="fas fa-exclamation-circle"></i><p>Failed to load subscribers: ' + err.message + '</p></td></tr>';
     }
   }
 
@@ -913,12 +913,15 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
     });
 
     if (!filtered.length) {
-      tbody.innerHTML = '<tr><td colspan="3" class="admin-empty-state"><i class="fas fa-users"></i><p>No subscribers found</p></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="4" class="admin-empty-state"><i class="fas fa-users"></i><p>No subscribers found</p></td></tr>';
       return;
     }
 
     tbody.innerHTML = filtered.map(function (s) {
-      return '<tr><td><strong>' + escapeHtml(s.first_name) + '</strong></td><td>' + escapeHtml(s.email) + '</td><td>' + formatDate(s.subscribed_at) + '</td></tr>';
+      var brevoBadge = s.brevo_synced
+        ? '<span class="status-badge status-successful"><i class="fas fa-check"></i> Synced</span>'
+        : '<span class="status-badge status-draft"><i class="fas fa-clock"></i> Pending</span>';
+      return '<tr><td><strong>' + escapeHtml(s.first_name) + '</strong></td><td>' + escapeHtml(s.email) + '</td><td>' + formatDate(s.subscribed_at) + '</td><td>' + brevoBadge + '</td></tr>';
     }).join('');
   }
 
@@ -932,15 +935,51 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
         showToast('info', 'No data', 'There are no subscribers to export.');
         return;
       }
-      var csv = ['First Name,Email,Date Joined'];
+      var csv = ['First Name,Email,Date Joined,Brevo Synced'];
       allSubscribers.forEach(function (s) {
         csv.push([
           csvEscape(s.first_name),
           csvEscape(s.email),
-          new Date(s.subscribed_at).toISOString()
+          new Date(s.subscribed_at).toISOString(),
+          s.brevo_synced ? 'Yes' : 'No'
         ].join(','));
       });
       downloadCSV(csv.join('\n'), 'newsletter-subscribers');
+    });
+  }
+
+  var brevoSyncBtn = document.getElementById('brevo-sync-btn');
+  if (brevoSyncBtn) {
+    brevoSyncBtn.addEventListener('click', async function () {
+      var unsynced = allSubscribers.filter(function (s) { return !s.brevo_synced; });
+      if (!unsynced.length) {
+        showToast('info', 'All synced', 'All subscribers are already synced to Brevo.');
+        return;
+      }
+      brevoSyncBtn.innerHTML = '<span class="spinner"></span> Syncing...';
+      brevoSyncBtn.disabled = true;
+      try {
+        var apiUrl = (import.meta.env.VITE_SUPABASE_URL || '') + '/functions/v1/brevo-sync/sync-all';
+        var res = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + (import.meta.env.VITE_SUPABASE_ANON_KEY || '')
+          },
+          body: JSON.stringify({})
+        });
+        var data = await res.json().catch(function () { return {}; });
+        if (!res.ok) throw new Error(data.details || data.error || 'Sync failed');
+        showToast('success', 'Brevo sync complete', (data.synced || 0) + ' subscriber(s) synced to Brevo.');
+        loadSubscribers();
+        loadOverview();
+      } catch (err) {
+        console.error('[Admin] Brevo sync error:', err.message, err);
+        showToast('error', 'Sync failed', err.message);
+      } finally {
+        brevoSyncBtn.innerHTML = '<i class="fas fa-sync"></i> Sync to Brevo';
+        brevoSyncBtn.disabled = false;
+      }
     });
   }
 
