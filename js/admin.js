@@ -307,14 +307,34 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
   // ============================================================
   // OVERVIEW
   // ============================================================
+  async function fetchSubscriberCount() {
+    try {
+      var apiUrl = (import.meta.env.VITE_SUPABASE_URL || '') + '/functions/v1/admin-subscribers/count';
+      var res = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + (import.meta.env.VITE_SUPABASE_ANON_KEY || '')
+        },
+        body: JSON.stringify({})
+      });
+      var data = await res.json().catch(function () { return {}; });
+      if (!res.ok) throw new Error(data.error || 'Failed to fetch subscriber count');
+      return data.count || 0;
+    } catch (err) {
+      console.error('[Admin] Subscriber count fetch error:', err.message);
+      return 0;
+    }
+  }
+
   async function loadOverview() {
     showSkeletonStats();
     try {
-      const [donationsRes, subscribersRes, galleryRes, newsRes] = await Promise.all([
+      const [donationsRes, galleryRes, newsRes, subscriberCount] = await Promise.all([
         supabase.from('donations').select('*', { count: 'exact' }),
-        supabase.from('newsletter_subscribers').select('id', { count: 'exact', head: true }),
         supabase.from('gallery_images').select('id', { count: 'exact', head: true }),
-        supabase.from('news_articles').select('id', { count: 'exact', head: true })
+        supabase.from('news_articles').select('id', { count: 'exact', head: true }),
+        fetchSubscriberCount()
       ]);
 
       const donationsData = donationsRes.data || [];
@@ -323,7 +343,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
 
       setStat('stat-donations', donationCount);
       setStat('stat-donors', uniqueDonors);
-      setStat('stat-subscribers', subscribersRes.count || 0);
+      setStat('stat-subscribers', subscriberCount);
       setStat('stat-gallery', galleryRes.count || 0);
       setStat('stat-news', newsRes.count || 0);
 
@@ -886,16 +906,20 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
     if (!tbody) return;
     tbody.innerHTML = skeletonRows(3, 4);
     try {
-      const { data, error } = await supabase
-        .from('newsletter_subscribers')
-        .select('*')
-        .order('subscribed_at', { ascending: false });
-
-      if (error) throw error;
-      allSubscribers = data || [];
+      var apiUrl = (import.meta.env.VITE_SUPABASE_URL || '') + '/functions/v1/admin-subscribers/subscribers';
+      var res = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + (import.meta.env.VITE_SUPABASE_ANON_KEY || '')
+        }
+      });
+      var data = await res.json().catch(function () { return {}; });
+      if (!res.ok) throw new Error(data.error || 'Failed to load subscribers');
+      allSubscribers = data.subscribers || [];
       renderSubscribers();
     } catch (err) {
-      console.error('[Admin] Subscribers fetch error:', err.message, err.details || '', err.hint || '', err);
+      console.error('[Admin] Subscribers fetch error:', err.message, err);
       tbody.innerHTML = '<tr><td colspan="4" class="admin-empty-state"><i class="fas fa-exclamation-circle"></i><p>Failed to load subscribers: ' + err.message + '</p></td></tr>';
     }
   }
