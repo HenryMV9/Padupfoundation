@@ -34,6 +34,7 @@ import { supabase } from './supabase-client.js';
   function showFeedback(type, message) {
     if (!feedback) return;
     feedback.className = 'newsletter-feedback ' + type;
+    feedback.style.display = 'flex';
     feedback.innerHTML = '<i class="fas ' + (type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle') + '"></i><span>' + message + '</span>';
   }
 
