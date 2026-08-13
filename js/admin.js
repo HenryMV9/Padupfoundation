@@ -838,7 +838,6 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
         return;
       }
 
-      const caption = document.getElementById('gallery-caption').value.trim();
       const category = document.getElementById('gallery-category').value;
       const uploadBtn = document.getElementById('gallery-upload-confirm');
 
@@ -871,7 +870,6 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
 
         const { error: dbError } = await supabase.from('gallery_images').insert([{
           image_url: imageUrl,
-          caption: caption || null,
           category: category
         }]);
 
