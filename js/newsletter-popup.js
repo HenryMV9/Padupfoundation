@@ -109,10 +109,9 @@ import { supabase } from './supabase-client.js';
 
 
     try {
-      const { data: insertData, error } = await supabase
+      const { error } = await supabase
         .from('newsletter_subscribers')
-        .insert([{ first_name: name, email: email }])
-        .select('id');
+        .insert([{ first_name: name, email: email }]);
 
       if (error && error.code !== '23505') {
         console.error('[Newsletter Popup] Insert error:', error.message, error.details, error.hint);
@@ -126,8 +125,7 @@ import { supabase } from './supabase-client.js';
         return;
       }
 
-      // Sync to Brevo (fire-and-forget)
-      syncToBrevo(email, name, insertData && insertData[0] ? insertData[0].id : null);
+      syncToBrevo(email, name, null);
 
       feedback.className = 'newsletter-popup-feedback success';
       feedback.innerHTML = '<i class="fas fa-check-circle"></i> Welcome aboard, ' + name + '! Check your inbox for updates.';

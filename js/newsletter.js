@@ -112,10 +112,9 @@ import { supabase } from './supabase-client.js';
     feedback.style.display = 'none';
 
     try {
-      const { data: insertData, error } = await supabase
+      const { error } = await supabase
         .from('newsletter_subscribers')
-        .insert([{ first_name: name, email: email }])
-        .select('id');
+        .insert([{ first_name: name, email: email }]);
 
       if (error) {
         if (error.code === '23505') {
@@ -130,8 +129,7 @@ import { supabase } from './supabase-client.js';
         nameInput.classList.remove('success', 'error');
         emailInput.classList.remove('success', 'error');
 
-        // Sync to Brevo (fire-and-forget)
-        syncToBrevo(email, name, insertData && insertData[0] ? insertData[0].id : null);
+        syncToBrevo(email, name, null);
       }
     } catch (err) {
       console.error('[Newsletter] Error:', err.message);
