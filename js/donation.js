@@ -1,9 +1,9 @@
 /* ============================================================
-   PAD UP FOUNDATION - Currency Selector & Donation Storage
-   Enhances the existing Flutterwave donation with:
+   PAD UP FOUNDATION - Currency Selector & Flutterwave Live Checkout
    - Multi-currency support (NGN, USD, GBP, EUR, CAD)
    - Dynamic amount display per currency
-   - Saving successful donations to Supabase
+   - Flutterwave Live checkout with server-side verification
+   - Donations saved only after server verifies the transaction
    ============================================================ */
 
 import { supabase } from './supabase-client.js';
@@ -12,6 +12,8 @@ import { supabase } from './supabase-client.js';
   const currencySelector = document.getElementById('currency-selector');
   const donateBtn = document.getElementById('donate-btn');
   if (!donateBtn) return;
+
+  const FLW_PUBLIC_KEY = import.meta.env.VITE_FLUTTERWAVE_PUBLIC_KEY || '';
 
   // Currency presets (suggested donation amounts per currency)
   const CURRENCY_PRESETS = {
@@ -72,28 +74,53 @@ import { supabase } from './supabase-client.js';
 
   updateAmountButtons();
 
-  // Save donation to Supabase
-  async function saveDonation(payment, amount, currency, name, email) {
+  // Show inline feedback message (success or error)
+  function showFeedback(type, message) {
+    var existing = document.getElementById('donation-feedback');
+    if (existing) existing.remove();
+
+    var div = document.createElement('div');
+    div.id = 'donation-feedback';
+    div.style.cssText = 'display:flex;align-items:flex-start;gap:var(--space-4);margin-top:var(--space-5);padding:var(--space-5);border-radius:var(--radius-md);' +
+      (type === 'success'
+        ? 'background:var(--success-light);color:#166534;'
+        : 'background:rgba(220,38,38,0.1);color:#991B1B;');
+    div.innerHTML = '<i class="fas ' + (type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle') + '" style="font-size:1.5rem;margin-top:2px;"></i><div>' + message + '</div>';
+    donateBtn.insertAdjacentElement('afterend', div);
+    if (type === 'error') {
+      setTimeout(function () { if (div.parentNode) div.remove(); }, 8000);
+    }
+  }
+
+  // Verify the transaction server-side and record the donation
+  async function verifyAndRecord(payment, amount, currency, name, email, phone) {
     try {
-      const { error } = await supabase
-        .from('donations')
-        .insert([{
-          donor_name: name && name !== 'Anonymous' ? name : null,
-          email: email && email !== 'donor@padupfoundation.org' ? email : null,
+      var apiUrl = (import.meta.env.VITE_SUPABASE_URL || '') + '/functions/v1/flutterwave-verify/verify';
+      var res = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + (import.meta.env.VITE_SUPABASE_ANON_KEY || '')
+        },
+        body: JSON.stringify({
+          transaction_id: payment.transaction_id,
+          tx_ref: payment.tx_ref,
           amount: amount,
           currency: currency,
-          flutterwave_tx_id: payment.tx_ref || payment.transaction_id || ('padup-' + Date.now()),
-          payment_status: 'successful'
-        }]);
+          donor_name: name,
+          donor_email: email,
+          donor_phone: phone
+        })
+      });
 
-      if (error) {
-        // If duplicate tx_id, ignore — payment already recorded
-        if (error.code !== '23505') {
-          console.error('[Donation] Failed to save:', error.message);
-        }
+      var data = await res.json().catch(function () { return {}; });
+      if (!res.ok) {
+        throw new Error(data.error || data.message || 'Verification failed (' + res.status + ')');
       }
+      return data;
     } catch (err) {
-      console.error('[Donation] Save error:', err.message);
+      console.error('[Donation] Verification error:', err.message);
+      throw err;
     }
   }
 
@@ -136,9 +163,20 @@ import { supabase } from './supabase-client.js';
       return;
     }
 
+    if (!FLW_PUBLIC_KEY) {
+      alert('Payment is not configured. Please contact support.');
+      return;
+    }
+
+    var originalText = newDonateBtn.innerHTML;
+    newDonateBtn.innerHTML = '<span class="spinner"></span> Redirecting to payment...';
+    newDonateBtn.disabled = true;
+
+    var txRef = 'padup-' + Date.now();
+
     FlutterwaveCheckout({
-      public_key: 'FLWPUBK_TEST-XXXXXXXXXXXXXXXXXXXXXXXXXXXX-X',
-      tx_ref: 'padup-' + Date.now(),
+      public_key: FLW_PUBLIC_KEY,
+      tx_ref: txRef,
       amount: selectedAmount,
       currency: selectedCurrency,
       payment_options: 'card, banktransfer, ussd, mobilemoney',
@@ -153,19 +191,40 @@ import { supabase } from './supabase-client.js';
         logo: window.location.origin + '/images/Padupfoundation-LOGO.jpg'
       },
       callback: async function (payment) {
-        if (payment.status === 'successful' || payment.status === 'completed') {
-          // Save to Supabase
-          await saveDonation(payment, selectedAmount, selectedCurrency, name, email);
+        newDonateBtn.innerHTML = '<span class="spinner"></span> Verifying payment...';
 
-          const successMsg = document.getElementById('donation-success');
-          if (successMsg) {
-            successMsg.style.display = 'flex';
-            successMsg.querySelector('.donation-amount').textContent =
-              formatAmount(selectedAmount, selectedCurrency);
+        if (payment.status === 'successful' || payment.status === 'completed') {
+          try {
+            var result = await verifyAndRecord(payment, selectedAmount, selectedCurrency, name, email, phone);
+
+            if (result.verified && result.success) {
+              var successMsg = document.getElementById('donation-success');
+              if (successMsg) {
+                successMsg.style.display = 'flex';
+                successMsg.querySelector('.donation-amount').textContent =
+                  formatAmount(result.amount || selectedAmount, result.currency || selectedCurrency);
+              }
+              showFeedback('success', '<strong>Payment verified!</strong> Your donation has been confirmed and recorded. Thank you for your generosity.');
+            } else if (result.verified && !result.success) {
+              showFeedback('error', '<strong>Payment not completed.</strong> ' + (result.message || 'The transaction was not successful. Please try again.'));
+            } else {
+              showFeedback('error', '<strong>Verification failed.</strong> ' + (result.message || 'We could not verify your payment. If you were charged, please contact us.'));
+            }
+          } catch (err) {
+            console.error('[Donation] Verification failed:', err.message);
+            showFeedback('error', '<strong>Verification error.</strong> Your payment is being processed. If you were charged, your donation will appear shortly. Please contact us if you have concerns.');
           }
+        } else {
+          showFeedback('error', '<strong>Payment ' + (payment.status || 'cancelled') + '.</strong> The transaction was not completed. Please try again.');
         }
+
+        newDonateBtn.innerHTML = originalText;
+        newDonateBtn.disabled = false;
       },
-      onclose: function () {}
+      onclose: function () {
+        newDonateBtn.innerHTML = originalText;
+        newDonateBtn.disabled = false;
+      }
     });
   });
 })();
