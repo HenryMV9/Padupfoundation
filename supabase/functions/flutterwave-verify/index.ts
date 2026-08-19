@@ -43,6 +43,16 @@ interface VerifyBody {
   donor_phone?: string;
 }
 
+interface InitializeBody {
+  tx_ref?: string;
+  amount?: number;
+  currency?: string;
+  redirect_url?: string;
+  donor_name?: string;
+  donor_email?: string;
+  donor_phone?: string;
+}
+
 interface FlutterwaveVerifyResponse {
   status: string;
   message: string;
@@ -84,6 +94,43 @@ async function verifyWithFlutterwave(transactionId: number): Promise<Flutterwave
   }
 
   return await res.json() as FlutterwaveVerifyResponse;
+}
+
+async function initializeWithFlutterwave(body: InitializeBody) {
+  const secretKey = Deno.env.get("FLUTTERWAVE_SECRET_KEY");
+  if (!secretKey) throw new Error("FLUTTERWAVE_SECRET_KEY not configured");
+
+  const res = await fetch("https://api.flutterwave.com/v3/payments", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${secretKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      tx_ref: body.tx_ref,
+      amount: body.amount,
+      currency: body.currency,
+      redirect_url: body.redirect_url,
+      payment_options: "card,banktransfer,ussd,mobilemoney",
+      customer: {
+        email: body.donor_email,
+        phone_number: body.donor_phone,
+        name: body.donor_name,
+      },
+      customizations: {
+        title: "Pad Up Foundation",
+        description: "Donation — Ending Period Poverty",
+        logo: `${new URL(body.redirect_url || "https://padupfoundation.org").origin}/images/Padupfoundation-LOGO.jpg`,
+      },
+    }),
+  });
+
+  const result = await res.json().catch(() => ({}));
+  if (!res.ok || result.status !== "success" || !result.data?.link) {
+    throw new Error(result.message || `Flutterwave payment setup failed (${res.status})`);
+  }
+
+  return result.data.link as string;
 }
 
 async function recordDonation(supabase: ReturnType<typeof createClient>, params: {
@@ -131,6 +178,28 @@ Deno.serve(async (req: Request) => {
 
     const url = new URL(req.url);
     const action = url.pathname.split("/").pop() || "";
+
+    /* ---- Initialize hosted payment (frontend calls this to get checkout link) ---- */
+    if (action === "initialize") {
+      const body = await req.json().catch(() => ({} as InitializeBody));
+      const { tx_ref, amount, currency, redirect_url, donor_name, donor_email, donor_phone } = body as InitializeBody;
+
+      if (!tx_ref || !amount || !currency || !donor_email) {
+        return jsonResponse(400, { error: "tx_ref, amount, currency, and donor_email are required" });
+      }
+
+      const link = await initializeWithFlutterwave({
+        tx_ref,
+        amount: Number(amount),
+        currency,
+        redirect_url: redirect_url || `${url.origin}/donate.html`,
+        donor_name,
+        donor_email,
+        donor_phone,
+      });
+
+      return jsonResponse(200, { success: true, link });
+    }
 
     /* ---- Verify transaction (frontend callback) ---- */
     if (action === "verify") {
