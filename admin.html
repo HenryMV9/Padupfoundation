@@ -159,6 +159,11 @@
             </div>
             <div class="admin-search-bar">
               <input type="text" class="admin-search-input" id="donations-search" placeholder="Search by name or email..." />
+              <select class="admin-filter-select" id="donations-campaign-filter">
+                <option value="">All Campaigns</option>
+                <option value="GENERAL">General</option>
+                <option value="STRIDE 2026">STRIDE 2026</option>
+              </select>
               <select class="admin-filter-select" id="donations-currency-filter">
                 <option value="">All Currencies</option>
                 <option value="NGN">NGN</option>
@@ -177,10 +182,10 @@
             <div class="admin-table-wrap">
               <table class="admin-table">
                 <thead>
-                  <tr><th>Donor Name</th><th>Email</th><th>Amount</th><th>Currency</th><th>Status</th><th>Date</th></tr>
+                  <tr><th>Donor Name</th><th>Email</th><th>Amount</th><th>Currency</th><th>Campaign</th><th>Status</th><th>Date</th></tr>
                 </thead>
                 <tbody id="donations-table-body">
-                  <tr><td colspan="6" class="admin-empty-state"><p>Loading...</p></td></tr>
+                  <tr><td colspan="7" class="admin-empty-state"><p>Loading...</p></td></tr>
                 </tbody>
               </table>
             </div>

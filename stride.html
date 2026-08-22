@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="STRIDE 2026 — Pad Up Foundation's Back-to-School Initiative supporting 1,000 students in Rivers State with school essentials and menstrual hygiene products." />
+  <meta property="og:title" content="STRIDE 2026 — Back-to-School Initiative | Pad Up Foundation" />
+  <meta property="og:description" content="Help 1,000 students in Rivers State start the school year equipped, confident, and ready to learn." />
+  <meta property="og:image" content="images/hero/Padupfoundation-3.jpg" />
+  <title>STRIDE 2026 — Back-to-School Initiative | Pad Up Foundation</title>
+  <link rel="icon" type="image/jpeg" href="images/Padupfoundation-LOGO.jpg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/enhancements.css" />
+  <style>
+    /* ===== STRIDE PAGE STYLES ===== */
+    .stride-hero {
+      position: relative;
+      min-height: 62vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      overflow: hidden;
+    }
+    .stride-hero-bg {
+      position: absolute; inset: 0; z-index: 0;
+    }
+    .stride-hero-bg img {
+      width: 100%; height: 100%; object-fit: cover;
+    }
+    .stride-hero-overlay {
+      position: absolute; inset: 0; z-index: 1;
+      background: linear-gradient(135deg, rgba(15,39,64,0.88) 0%, rgba(27,58,92,0.78) 100%);
+    }
+    .stride-hero-content {
+      position: relative; z-index: 2;
+      max-width: 760px; padding: var(--space-20) var(--space-6);
+    }
+    .stride-hero .badge {
+      background: rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.95);
+      border: 1px solid rgba(255,255,255,0.25);
+      margin-bottom: var(--space-5);
+    }
+    .stride-hero h1 {
+      color: var(--white);
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      margin-bottom: var(--space-4);
+      line-height: 1.15;
+    }
+    .stride-hero h1 span { color: var(--accent-light); }
+    .stride-hero p {
+      color: rgba(255,255,255,0.85);
+      font-size: 1.125rem;
+      max-width: 600px;
+      margin: 0 auto var(--space-8);
+    }
+    .stride-hero-stat {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-1);
+      padding: var(--space-4) var(--space-8);
+      background: rgba(255,255,255,0.08);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(255,255,255,0.15);
+      backdrop-filter: blur(8px);
+    }
+    .stride-hero-stat-num {
+      font-family: var(--font-heading);
+      font-size: 2.5rem; font-weight: 800;
+      color: var(--white); line-height: 1;
+    }
+    .stride-hero-stat-label {
+      font-size: 0.8125rem;
+      color: rgba(255,255,255,0.75);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    /* ===== WHY STRIDE ===== */
+    .stride-why {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-12);
+      align-items: center;
+    }
+    .stride-why-image {
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: var(--shadow-xl);
+      position: relative;
+    }
+    .stride-why-image img {
+      width: 100%; height: 100%; object-fit: cover;
+      min-height: 340px;
+    }
+    .stride-why-content h2 {
+      margin-bottom: var(--space-4);
+    }
+    .stride-why-content p {
+      margin-bottom: var(--space-4);
+      font-size: 1.0625rem;
+    }
+    .stride-challenge-list {
+      display: flex; flex-direction: column;
+      gap: var(--space-4);
+      margin-top: var(--space-6);
+    }
+    .stride-challenge-item {
+      display: flex; align-items: flex-start; gap: var(--space-4);
+      padding: var(--space-4) var(--space-5);
+      background: var(--gray-50);
+      border-radius: var(--radius-md);
+      border-left: 4px solid var(--accent);
+      transition: all var(--transition-base);
+    }
+    .stride-challenge-item:hover {
+      background: var(--white);
+      box-shadow: var(--shadow-md);
+      transform: translateX(4px);
+    }
+    .stride-challenge-icon {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: var(--gradient-primary);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--white); font-size: 1.125rem;
+      flex-shrink: 0;
+    }
+    .stride-challenge-item h4 {
+      margin-bottom: var(--space-1);
+      font-size: 1rem;
+    }
+    .stride-challenge-item p {
+      font-size: 0.9375rem;
+      margin: 0;
+    }
+
+    /* ===== WHAT SUPPORT PROVIDES ===== */
+    .stride-provides-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: var(--space-5);
+    }
+    .stride-provide-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: var(--space-8) var(--space-5);
+      text-align: center;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--gray-100);
+      transition: all var(--transition-spring);
+    }
+    .stride-provide-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-xl);
+      border-color: rgba(27,58,92,0.15);
+    }
+    .stride-provide-icon {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: var(--gradient-primary);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto var(--space-5);
+      font-size: 1.5rem; color: var(--white);
+      transition: transform var(--transition-spring);
+    }
+    .stride-provide-card:hover .stride-provide-icon {
+      transform: scale(1.1) rotate(-5deg);
+    }
+    .stride-provide-card h4 {
+      margin-bottom: var(--space-2);
+      font-size: 1.0625rem;
+    }
+    .stride-provide-card p {
+      font-size: 0.875rem;
+      margin: 0;
+    }
+
+    /* ===== GALLERY ===== */
+    .stride-gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-4);
+    }
+    .stride-gallery-item {
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      position: relative;
+      aspect-ratio: 1;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: all var(--transition-base);
+    }
+    .stride-gallery-item:hover {
+      box-shadow: var(--shadow-lg);
+      transform: scale(1.02);
+    }
+    .stride-gallery-item img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform var(--transition-slow);
+    }
+    .stride-gallery-item:hover img {
+      transform: scale(1.08);
+    }
+    .stride-gallery-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(0deg, rgba(15,39,64,0.7) 0%, transparent 50%);
+      display: flex; align-items: flex-end;
+      padding: var(--space-4);
+      opacity: 0;
+      transition: opacity var(--transition-base);
+    }
+    .stride-gallery-item:hover .stride-gallery-overlay {
+      opacity: 1;
+    }
+    .stride-gallery-overlay span {
+      color: var(--white);
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+
+    /* ===== CURRENCY CONVERTER ===== */
+    .stride-converter {
+      background: var(--white);
+      border-radius: var(--radius-xl);
+      padding: var(--space-8);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--gray-200);
+      max-width: 520px;
+      margin: 0 auto;
+    }
+    .stride-converter-header {
+      display: flex; align-items: center; gap: var(--space-3);
+      margin-bottom: var(--space-5);
+    }
+    .stride-converter-header i {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: var(--gradient-primary-soft);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--primary); font-size: 1.125rem;
+    }
+    .stride-converter-header h3 {
+      margin: 0; font-size: 1.125rem;
+    }
+    .stride-converter-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: var(--space-3);
+      align-items: end;
+    }
+    .stride-converter-input-wrap {
+      display: flex; flex-direction: column; gap: var(--space-2);
+    }
+    .stride-converter-input-wrap label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--gray-500);
+    }
+    .stride-converter-swap {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: var(--gradient-primary);
+      color: var(--white);
+      display: flex; align-items: center; justify-content: center;
+      border: none; cursor: pointer;
+      font-size: 1rem;
+      transition: transform var(--transition-spring);
+      align-self: flex-end;
+      margin-bottom: 1px;
+    }
+    .stride-converter-swap:hover {
+      transform: rotate(180deg);
+    }
+    .stride-converter-input,
+    .stride-converter-select {
+      padding: 0.625rem 0.75rem;
+      border: 2px solid var(--gray-200);
+      border-radius: var(--radius-sm);
+      font-size: 0.9375rem;
+      font-family: var(--font-body);
+      transition: border-color var(--transition-base);
+      width: 100%;
+    }
+    .stride-converter-input:focus,
+    .stride-converter-select:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    .stride-converter-result {
+      margin-top: var(--space-5);
+      padding: var(--space-5);
+      background: var(--gradient-primary-soft);
+      border-radius: var(--radius-md);
+      text-align: center;
+      border: 1px solid rgba(27,58,92,0.08);
+    }
+    .stride-converter-result-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--gray-500);
+      margin-bottom: var(--space-1);
+    }
+    .stride-converter-result-value {
+      font-family: var(--font-heading);
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+    .stride-converter-rate {
+      font-size: 0.8125rem;
+      color: var(--gray-400);
+      margin-top: var(--space-2);
+    }
+
+    /* ===== DONATION SECTION ===== */
+    .stride-donate {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .stride-donate::before {
+      content: '';
+      position: absolute;
+      top: -50%; right: -20%;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(200,16,46,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .stride-donate-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      gap: var(--space-12);
+      align-items: start;
+      position: relative;
+      z-index: 1;
+    }
+    .stride-donate-info .badge {
+      background: rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.95);
+      border: 1px solid rgba(255,255,255,0.25);
+    }
+    .stride-donate-info h2 {
+      color: var(--white);
+      margin-bottom: var(--space-4);
+    }
+    .stride-donate-info p {
+      color: rgba(255,255,255,0.8);
+      font-size: 1.0625rem;
+      margin-bottom: var(--space-6);
+    }
+    .stride-donate-perks {
+      display: flex; flex-direction: column;
+      gap: var(--space-3);
+    }
+    .stride-donate-perk {
+      display: flex; align-items: center; gap: var(--space-3);
+      color: rgba(255,255,255,0.9);
+      font-size: 0.9375rem;
+    }
+    .stride-donate-perk i {
+      color: var(--accent-light);
+      font-size: 1.125rem;
+      flex-shrink: 0;
+    }
+    .stride-donate-form {
+      background: var(--white);
+      border-radius: var(--radius-xl);
+      padding: var(--space-8);
+      box-shadow: var(--shadow-xl);
+    }
+    .stride-donate-form h3 {
+      margin-bottom: var(--space-2);
+      color: var(--primary);
+    }
+    .stride-donate-form > p {
+      font-size: 0.9375rem;
+      color: var(--gray-500);
+      margin-bottom: var(--space-6);
+    }
+    .stride-campaign-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: 0.375rem var(--space-4);
+      background: var(--success-light);
+      color: var(--success);
+      border-radius: var(--radius-full);
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-bottom: var(--space-5);
+    }
+    .stride-amount-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-3);
+      margin-bottom: var(--space-4);
+    }
+    .stride-amount-btn {
+      padding: var(--space-4) var(--space-2);
+      border: 2px solid var(--gray-200);
+      border-radius: var(--radius-sm);
+      background: var(--white);
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 0.9375rem;
+      color: var(--gray-700);
+      cursor: pointer;
+      transition: all var(--transition-base);
+      text-align: center;
+    }
+    .stride-amount-btn:hover {
+      border-color: var(--primary-light);
+      background: var(--gray-50);
+    }
+    .stride-amount-btn.selected {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: var(--white);
+      box-shadow: var(--shadow-accent);
+    }
+    .stride-amount-btn small {
+      display: block;
+      font-size: 0.6875rem;
+      font-weight: 400;
+      opacity: 0.7;
+      margin-top: 2px;
+    }
+    .stride-donate-form .form-group {
+      margin-bottom: var(--space-4);
+    }
+    .stride-donate-form .form-group label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--gray-700);
+      margin-bottom: var(--space-2);
+      display: block;
+    }
+    .stride-donate-form .form-control {
+      width: 100%;
+      padding: 0.625rem 0.875rem;
+      border: 2px solid var(--gray-200);
+      border-radius: var(--radius-sm);
+      font-size: 0.9375rem;
+      transition: border-color var(--transition-base);
+    }
+    .stride-donate-form .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    .stride-donate-form .form-control::placeholder {
+      color: var(--gray-400);
+    }
+    .stride-donate-btn {
+      width: 100%;
+      justify-content: center;
+      margin-top: var(--space-2);
+    }
+    .stride-donate-btn .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: var(--white);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .stride-feedback {
+      display: flex; align-items: flex-start; gap: var(--space-3);
+      margin-top: var(--space-4);
+      padding: var(--space-4);
+      border-radius: var(--radius-md);
+      font-size: 0.9375rem;
+    }
+    .stride-feedback.success {
+      background: var(--success-light);
+      color: #166534;
+    }
+    .stride-feedback.error {
+      background: var(--error-light);
+      color: #991B1B;
+    }
+    .stride-feedback i { font-size: 1.25rem; flex-shrink: 0; margin-top: 2px; }
+    .stride-secure-badges {
+      display: flex; flex-wrap: wrap; gap: var(--space-4);
+      margin-top: var(--space-5);
+      padding-top: var(--space-5);
+      border-top: 1px solid var(--gray-100);
+    }
+    .stride-secure-badge {
+      display: flex; align-items: center; gap: var(--space-2);
+      font-size: 0.8125rem;
+      color: var(--gray-500);
+    }
+    .stride-secure-badge i { color: var(--success); }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 900px) {
+      .stride-why { grid-template-columns: 1fr; }
+      .stride-provides-grid { grid-template-columns: repeat(2, 1fr); }
+      .stride-gallery-grid { grid-template-columns: repeat(2, 1fr); }
+      .stride-donate-grid { grid-template-columns: 1fr; }
+      .stride-amount-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) {
+      .stride-provides-grid { grid-template-columns: 1fr; }
+      .stride-gallery-grid { grid-template-columns: 1fr 1fr; }
+      .stride-converter-row { grid-template-columns: 1fr; }
+      .stride-converter-swap { transform: rotate(90deg); margin: 0 auto; }
+      .stride-converter-swap:hover { transform: rotate(270deg); }
+      .stride-hero-stat { padding: var(--space-3) var(--space-5); }
+      .stride-hero-stat-num { font-size: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== NAVIGATION ===== -->
+  <nav class="navbar transparent" role="navigation" aria-label="Main navigation">
+    <div class="navbar-inner">
+      <a href="index.html" class="navbar-logo" aria-label="Pad Up Foundation Home">
+        <img src="images/Padupfoundation-LOGO.jpg" alt="Pad Up Foundation Logo" />
+        <div class="navbar-logo-text">
+          <span class="logo-name">Pad Up Foundation</span>
+          <span class="logo-tagline">Empowering Girls &bull; Building Futures</span>
+        </div>
+      </a>
+      <ul class="navbar-nav" role="list">
+        <li><a href="index.html" class="nav-link">Home</a></li>
+        <li><a href="about.html" class="nav-link">About</a></li>
+        <li><a href="founder.html" class="nav-link">Founder</a></li>
+        <li><a href="gallery.html" class="nav-link">Gallery</a></li>
+        <li><a href="news.html" class="nav-link">News</a></li>
+        <li><a href="stride.html" class="nav-link nav-donate">STRIDE 2026</a></li>
+        <li><a href="donate.html" class="nav-link">Donate</a></li>
+        <li><a href="get-involved.html" class="nav-link">Get Involved</a></li>
+        <li><a href="contact.html" class="nav-link">Contact</a></li>
+      </ul>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== STRIDE HERO ===== -->
+  <section class="stride-hero" aria-label="STRIDE 2026 hero">
+    <div class="stride-hero-bg">
+      <img src="images/hero/Padupfoundation-3.jpg" alt="Students in a classroom" loading="eager" />
+    </div>
+    <div class="stride-hero-overlay" aria-hidden="true"></div>
+    <div class="stride-hero-content reveal">
+      <div class="badge">Back-to-School Initiative</div>
+      <h1>STRIDE <span>2026</span></h1>
+      <p>Equipping 1,000 students in underserved communities across Rivers State with the school essentials and menstrual hygiene support they need to start the year confident and ready to learn.</p>
+      <div class="stride-hero-stat">
+        <div class="stride-hero-stat-num">1,000</div>
+        <div class="stride-hero-stat-label">Students to Support</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== INTRODUCTION ===== -->
+  <section class="section" aria-labelledby="stride-intro-heading">
+    <div class="container">
+      <div class="stride-why">
+        <div class="stride-why-image reveal from-left">
+          <img src="images/outreach/Padupfoundation-2.jpg" alt="Pad Up Foundation outreach in a school" loading="lazy" />
+        </div>
+        <div class="stride-why-content reveal from-right">
+          <div class="badge">The Initiative</div>
+          <h2 id="stride-intro-heading">Back to School, Back to Dignity.</h2>
+          <p>STRIDE 2026 is Pad Up Foundation's flagship back-to-school campaign. We're mobilizing resources to reach <strong>1,000 students</strong> in Rivers State before the new academic year begins — delivering backpacks, writing materials, sanitary pads, and educational support directly to the communities that need them most.</p>
+          <p>For many families, the cost of school essentials is a barrier that keeps children — especially girls — from returning to class. STRIDE removes that barrier.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== WHY STRIDE MATTERS ===== -->
+  <section class="section" style="background: var(--gray-50);" aria-labelledby="stride-why-heading">
+    <div class="container">
+      <header class="section-header text-center reveal">
+        <div class="badge">The Challenge</div>
+        <h2 id="stride-why-heading">Why STRIDE Matters</h2>
+        <p>Every new school year, families in underserved communities face an impossible choice: buy school essentials or meet basic needs. Girls carry an additional burden.</p>
+      </header>
+      <div class="stride-challenge-list stagger" style="max-width: 900px; margin: 0 auto;">
+        <div class="stride-challenge-item">
+          <div class="stride-challenge-icon"><i class="fas fa-book"></i></div>
+          <div>
+            <h4>School Essentials Are Out of Reach</h4>
+            <p>Many parents cannot afford backpacks, exercise books, and writing materials. Children show up empty-handed — or don't show up at all.</p>
+          </div>
+        </div>
+        <div class="stride-challenge-item">
+          <div class="stride-challenge-icon"><i class="fas fa-female"></i></div>
+          <div>
+            <h4>Periods Keep Girls Out of Class</h4>
+            <p>Without sanitary pads, girls miss school during their menstrual cycle. Missing a few days each month adds up to weeks of lost learning every term.</p>
+          </div>
+        </div>
+        <div class="stride-challenge-item">
+          <div class="stride-challenge-icon"><i class="fas fa-graduation-cap"></i></div>
+          <div>
+            <h4>Education Is the Way Out</h4>
+            <p>Every child equipped for school is a child with a chance at a better future. STRIDE ensures no student is left behind because of poverty.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== WHAT YOUR SUPPORT PROVIDES ===== -->
+  <section class="section" aria-labelledby="stride-provides-heading">
+    <div class="container">
+      <header class="section-header text-center reveal">
+        <div class="badge">Your Impact</div>
+        <h2 id="stride-provides-heading">What Your Support Provides</h2>
+        <p>Every donation to STRIDE 2026 directly funds the items students need to walk into school ready to learn.</p>
+      </header>
+      <div class="stride-provides-grid stagger">
+        <div class="stride-provide-card">
+          <div class="stride-provide-icon"><i class="fas fa-suitcase"></i></div>
+          <h4>School Backpacks</h4>
+          <p>Durable bags for students to carry their books and materials with pride.</p>
+        </div>
+        <div class="stride-provide-card">
+          <div class="stride-provide-icon"><i class="fas fa-book-open"></i></div>
+          <h4>Exercise Books</h4>
+          <p>Notebooks for every subject, enough to last through the term.</p>
+        </div>
+        <div class="stride-provide-card">
+          <div class="stride-provide-icon"><i class="fas fa-pen"></i></div>
+          <h4>Writing Materials</h4>
+          <p>Pens, pencils, erasers, and rulers — the everyday tools of learning.</p>
+        </div>
+        <div class="stride-provide-card">
+          <div class="stride-provide-icon"><i class="fas fa-box-open"></i></div>
+          <h4>Sanitary Pads</h4>
+          <p>A supply of pads so girls never miss class because of their period.</p>
+        </div>
+        <div class="stride-provide-card">
+          <div class="stride-provide-icon"><i class="fas fa-book-reader"></i></div>
+          <h4>Hygiene &amp; Education Materials</h4>
+          <p>Menstrual hygiene guides and educational resources for students and families.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== GALLERY ===== -->
+  <section class="section" style="background: var(--gray-50);" aria-labelledby="stride-gallery-heading">
+    <div class="container">
+      <header class="section-header text-center reveal">
+        <div class="badge">Our Work in Action</div>
+        <h2 id="stride-gallery-heading">Moments From the Field</h2>
+        <p>Real outreach moments from communities we've served across Nigeria.</p>
+      </header>
+      <div class="stride-gallery-grid stagger">
+        <div class="stride-gallery-item" data-lightbox="images/hero/Padupfoundation-4.jpg" role="button" tabindex="0" aria-label="Open image">
+          <img src="images/hero/Padupfoundation-4.jpg" alt="Girls celebrating receiving sanitary pads" loading="lazy" />
+          <div class="stride-gallery-overlay"><span>Outreach Program</span></div>
+        </div>
+        <div class="stride-gallery-item" data-lightbox="images/hero/Padupfoundation-3.jpg" role="button" tabindex="0" aria-label="Open image">
+          <img src="images/hero/Padupfoundation-3.jpg" alt="Students in a classroom" loading="lazy" />
+          <div class="stride-gallery-overlay"><span>Classroom Session</span></div>
+        </div>
+        <div class="stride-gallery-item" data-lightbox="images/outreach/Padupfoundation-2.jpg" role="button" tabindex="0" aria-label="Open image">
+          <img src="images/outreach/Padupfoundation-2.jpg" alt="Outreach event" loading="lazy" />
+          <div class="stride-gallery-overlay"><span>Community Drive</span></div>
+        </div>
+        <div class="stride-gallery-item" data-lightbox="images/gallery/Padupfoundation-1.jpg" role="button" tabindex="0" aria-label="Open image">
+          <img src="images/gallery/Padupfoundation-1.jpg" alt="Volunteer sharing products" loading="lazy" />
+          <div class="stride-gallery-overlay"><span>Direct Support</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CURRENCY CONVERTER ===== -->
+  <section class="section-sm" aria-labelledby="stride-converter-heading">
+    <div class="container">
+      <header class="section-header text-center reveal" style="margin-bottom: var(--space-8);">
+        <div class="badge">Plan Your Gift</div>
+        <h2 id="stride-converter-heading">Currency Converter</h2>
+        <p>Check what your donation looks like in Nigerian Naira before you give.</p>
+      </header>
+      <div class="stride-converter reveal">
+        <div class="stride-converter-header">
+          <i class="fas fa-exchange-alt"></i>
+          <h3>Convert Your Currency</h3>
+        </div>
+        <div class="stride-converter-row">
+          <div class="stride-converter-input-wrap">
+            <label for="converter-from-amount">Amount</label>
+            <input type="number" id="converter-from-amount" class="stride-converter-input" value="25" min="0" step="any" />
+          </div>
+          <button class="stride-converter-swap" id="converter-swap-btn" aria-label="Swap currencies">
+            <i class="fas fa-arrow-right-arrow-left"></i>
+          </button>
+          <div class="stride-converter-input-wrap">
+            <label for="converter-from-currency">From</label>
+            <select id="converter-from-currency" class="stride-converter-select">
+              <option value="USD">USD — US Dollar</option>
+              <option value="GBP">GBP — British Pound</option>
+              <option value="EUR">EUR — Euro</option>
+              <option value="CAD">CAD — Canadian Dollar</option>
+              <option value="NGN" selected>NGN — Nigerian Naira</option>
+            </select>
+          </div>
+        </div>
+        <div class="stride-converter-result">
+          <div class="stride-converter-result-label">Converted Amount</div>
+          <div class="stride-converter-result-value" id="converter-result-value">&#8358;25.00</div>
+          <div class="stride-converter-rate" id="converter-rate">1 NGN = 1.00 NGN</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== DONATION SECTION ===== -->
+  <section class="section stride-donate" aria-labelledby="stride-donate-heading">
+    <div class="container">
+      <div class="stride-donate-grid">
+        <div class="stride-donate-info reveal from-left">
+          <div class="badge">Support STRIDE 2026</div>
+          <h2 id="stride-donate-heading">Send a Student Back to School.</h2>
+          <p>Your donation directly equips students in Rivers State with the backpacks, books, writing materials, and sanitary pads they need. Every gift — large or small — moves us closer to our 1,000-student goal.</p>
+          <div class="stride-donate-perks">
+            <div class="stride-donate-perk"><i class="fas fa-check-circle"></i> 100% of STRIDE donations go to student kits</div>
+            <div class="stride-donate-perk"><i class="fas fa-check-circle"></i> Secure payment via Flutterwave</div>
+            <div class="stride-donate-perk"><i class="fas fa-check-circle"></i> Transparent reporting on every outreach</div>
+            <div class="stride-donate-perk"><i class="fas fa-check-circle"></i> Donation receipts sent to your email</div>
+          </div>
+        </div>
+
+        <div class="stride-donate-form reveal from-right">
+          <div class="stride-campaign-tag">
+            <i class="fas fa-tag"></i> Campaign: STRIDE 2026
+          </div>
+          <h3>Make Your STRIDE Donation</h3>
+          <p>Choose an amount below or enter your own. All payments are processed securely.</p>
+
+          <!-- Amount Selection -->
+          <div style="margin-bottom: var(--space-5);">
+            <label style="display: block; margin-bottom: var(--space-3); font-weight: 600; font-family: var(--font-heading); color: var(--gray-700);">Select Amount (NGN)</label>
+            <div class="stride-amount-grid" id="stride-amount-grid">
+              <button class="stride-amount-btn" data-amount="10000">&#8358;10,000</button>
+              <button class="stride-amount-btn selected" data-amount="25000">&#8358;25,000</button>
+              <button class="stride-amount-btn" data-amount="50000">&#8358;50,000</button>
+              <button class="stride-amount-btn" data-amount="100000">&#8358;100,000</button>
+            </div>
+            <div class="form-group" style="margin-top: var(--space-3);">
+              <input type="number" id="stride-custom-amount" class="form-control" placeholder="Or enter custom amount (&#8358;)" min="1000" aria-label="Custom donation amount" />
+            </div>
+          </div>
+
+          <!-- Donor Info -->
+          <div class="form-group">
+            <label for="stride-donor-name">Full Name <span class="required">*</span></label>
+            <input type="text" id="stride-donor-name" class="form-control" placeholder="Your full name" required autocomplete="name" />
+          </div>
+          <div class="form-group">
+            <label for="stride-donor-email">Email Address <span class="required">*</span></label>
+            <input type="email" id="stride-donor-email" class="form-control" placeholder="your@email.com" required autocomplete="email" />
+          </div>
+          <div class="form-group">
+            <label for="stride-donor-phone">Phone Number <span style="font-weight:400;color:var(--gray-400);">(optional)</span></label>
+            <input type="tel" id="stride-donor-phone" class="form-control" placeholder="08000000000" autocomplete="tel" />
+          </div>
+          <div class="form-group">
+            <label for="stride-donor-message">Message <span style="font-weight:400;color:var(--gray-400);">(optional)</span></label>
+            <textarea id="stride-donor-message" class="form-control" rows="2" placeholder="A note of encouragement for the students"></textarea>
+          </div>
+
+          <!-- Donate Button -->
+          <button id="stride-donate-btn" class="btn btn-primary btn-lg stride-donate-btn" aria-label="Proceed to donate">
+            <i class="fas fa-heart"></i> Support STRIDE 2026
+          </button>
+
+          <!-- Success Message -->
+          <div id="stride-success-msg" class="stride-feedback success" style="display:none;">
+            <i class="fas fa-check-circle"></i>
+            <div>
+              <strong style="display:block; margin-bottom: 4px;">Thank you for supporting STRIDE 2026!</strong>
+              Your donation of <strong class="stride-amount"></strong> will help send students back to school equipped and confident. A confirmation has been sent to your email.
+            </div>
+          </div>
+
+          <!-- Error Feedback -->
+          <div id="stride-error-msg" class="stride-feedback error" style="display:none;">
+            <i class="fas fa-exclamation-circle"></i>
+            <span class="stride-error-text"></span>
+          </div>
+
+          <!-- Security Badges -->
+          <div class="stride-secure-badges">
+            <div class="stride-secure-badge"><i class="fas fa-shield-halved"></i> SSL Encrypted</div>
+            <div class="stride-secure-badge"><i class="fas fa-lock"></i> Secure Payment</div>
+            <div class="stride-secure-badge"><i class="fas fa-check-circle"></i> Flutterwave Verified</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <img src="images/Padupfoundation-LOGO.jpg" alt="Pad Up Foundation" />
+          <p>Ending period poverty and empowering every girl's potential through menstrual hygiene support, education, and advocacy.</p>
+          <div class="social-links" aria-label="Social media links">
+            <a href="https://www.instagram.com/officialpadupfoundation" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="social-link" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="social-link" aria-label="Twitter / X"><i class="fab fa-x-twitter"></i></a>
+            <a href="#" class="social-link" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+          </div>
+        </div>
+        <nav aria-label="Quick links">
+          <h3 class="footer-heading">Quick Links</h3>
+          <ul class="footer-links">
+            <li><a href="index.html"><i class="fas fa-chevron-right fa-xs"></i> Home</a></li>
+            <li><a href="about.html"><i class="fas fa-chevron-right fa-xs"></i> About Us</a></li>
+            <li><a href="gallery.html"><i class="fas fa-chevron-right fa-xs"></i> Gallery</a></li>
+            <li><a href="stride.html"><i class="fas fa-chevron-right fa-xs"></i> STRIDE 2026</a></li>
+            <li><a href="donate.html"><i class="fas fa-chevron-right fa-xs"></i> Donate</a></li>
+            <li><a href="get-involved.html"><i class="fas fa-chevron-right fa-xs"></i> Get Involved</a></li>
+            <li><a href="contact.html"><i class="fas fa-chevron-right fa-xs"></i> Contact</a></li>
+          </ul>
+        </nav>
+        <div>
+          <h3 class="footer-heading">Get Involved</h3>
+          <ul class="footer-links">
+            <li><a href="get-involved.html#volunteer"><i class="fas fa-chevron-right fa-xs"></i> Volunteer</a></li>
+            <li><a href="get-involved.html#partner"><i class="fas fa-chevron-right fa-xs"></i> Partner With Us</a></li>
+            <li><a href="stride.html"><i class="fas fa-chevron-right fa-xs"></i> Support STRIDE 2026</a></li>
+            <li><a href="donate.html"><i class="fas fa-chevron-right fa-xs"></i> Make a Donation</a></li>
+          </ul>
+        </div>
+        <address style="font-style: normal;">
+          <h3 class="footer-heading">Contact Us</h3>
+          <div class="footer-contact-item">
+            <div class="footer-contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+            <div>
+              <span style="display: block; color: var(--gray-500); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">Address</span>
+              <span style="display: block; color: var(--gray-700);">No 1 Location Road<br>Orazi, Port Harcourt</span>
+            </div>
+          </div>
+          <div class="footer-contact-item">
+            <div class="footer-contact-icon"><i class="fas fa-phone"></i></div>
+            <div>
+              <span style="display: block; color: var(--gray-500); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">Phone</span>
+              <a href="tel:+2347063233363">0706 323 3363</a>
+            </div>
+          </div>
+          <div class="footer-contact-item">
+            <div class="footer-contact-icon"><i class="fas fa-envelope"></i></div>
+            <div>
+              <span style="display: block; color: var(--gray-500); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">Email</span>
+              <a href="mailto:info@padupfoundation.org">info@padupfoundation.org</a>
+            </div>
+          </div>
+        </address>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Pad Up Foundation. All rights reserved.</p>
+        <div class="footer-bottom-links">
+          <a href="privacy.html">Privacy Policy</a>
+          <a href="terms.html">Terms &amp; Conditions</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <button class="back-to-top" aria-label="Back to top" style="
+    position: fixed; bottom: 24px; right: 24px; z-index: 500;
+    width: 48px; height: 48px; border-radius: 50%;
+    background: var(--gradient-primary); color: var(--white);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: var(--shadow-accent); cursor: pointer; border: none;
+    font-size: 1rem; opacity: 0; transform: translateY(20px);
+    transition: all var(--transition-base); pointer-events: none;">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+  <style>
+    .back-to-top.visible { opacity: 1 !important; transform: translateY(0) !important; pointer-events: all !important; }
+    .back-to-top:hover { transform: translateY(-4px) !important; box-shadow: 0 12px 32px rgba(200,16,46,0.35) !important; }
+  </style>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" style="display:none;">
+    <button class="lightbox-close" aria-label="Close"><i class="fas fa-times"></i></button>
+    <button class="lightbox-nav prev" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
+    <img class="lightbox-img" src="" alt="" />
+    <button class="lightbox-nav next" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
+  </div>
+
+  <script type="module" src="/js/app.js"></script>
+  <script type="module" src="/js/main.js"></script>
+  <script type="module" src="/js/stride.js"></script>
+<script type="module" src="/js/cursor.js"></script>
+</body>
+</html>

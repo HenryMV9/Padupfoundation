@@ -398,7 +398,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       updateDonationSummary();
     } catch (err) {
       console.error('[Admin] Donations fetch error:', err.message, err.details || '', err.hint || '', err);
-      tbody.innerHTML = '<tr><td colspan="6" class="admin-empty-state"><i class="fas fa-exclamation-circle"></i><p>Failed to load donations: ' + err.message + '</p></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="admin-empty-state"><i class="fas fa-exclamation-circle"></i><p>Failed to load donations: ' + err.message + '</p></td></tr>';
     }
   }
 
@@ -412,6 +412,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
   function renderDonations() {
     const searchEl = document.getElementById('donations-search');
     const currencyEl = document.getElementById('donations-currency-filter');
+    const campaignEl = document.getElementById('donations-campaign-filter');
     const sortEl = document.getElementById('donations-sort');
     const search = (searchEl ? searchEl.value : '').toLowerCase();
     const currencyFilter = currencyEl ? currencyEl.value : '';
@@ -422,7 +423,9 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
         (d.donor_name && d.donor_name.toLowerCase().includes(search)) ||
         (d.email && d.email.toLowerCase().includes(search));
       const matchesCurrency = !currencyFilter || d.currency === currencyFilter;
-      return matchesSearch && matchesCurrency;
+      const campaignFilter = campaignEl ? campaignEl.value : '';
+      const matchesCampaign = !campaignFilter || (d.campaign || 'GENERAL') === campaignFilter;
+      return matchesSearch && matchesCurrency && matchesCampaign;
     });
 
     if (sortBy === 'highest') {
@@ -436,16 +439,21 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
     const tbody = document.getElementById('donations-table-body');
     if (!tbody) return;
     if (!filtered.length) {
-      tbody.innerHTML = '<tr><td colspan="6" class="admin-empty-state"><i class="fas fa-inbox"></i><p>No donations found</p></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" class="admin-empty-state"><i class="fas fa-inbox"></i><p>No donations found</p></td></tr>';
       return;
     }
 
     tbody.innerHTML = filtered.map(function (d) {
+      var campaign = d.campaign || 'GENERAL';
+      var campaignBadge = campaign === 'STRIDE 2026'
+        ? '<span class="status-badge" style="background:rgba(200,16,46,0.1);color:#C8102E;">STRIDE 2026</span>'
+        : '<span class="status-badge" style="background:var(--gray-100);color:var(--gray-500);">General</span>';
       return '<tr>' +
         '<td><strong>' + escapeHtml(d.donor_name || 'Anonymous') + '</strong></td>' +
         '<td>' + escapeHtml(d.email || '\u2014') + '</td>' +
         '<td>' + Number(d.amount).toLocaleString() + '</td>' +
         '<td>' + d.currency + '</td>' +
+        '<td>' + campaignBadge + '</td>' +
         '<td><span class="status-badge status-successful">' + escapeHtml(d.payment_status) + '</span></td>' +
         '<td>' + formatDate(d.created_at) + '</td>' +
         '</tr>';
@@ -456,6 +464,8 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
   if (donationsSearchEl) donationsSearchEl.addEventListener('input', renderDonations);
   var donationsCurrencyEl = document.getElementById('donations-currency-filter');
   if (donationsCurrencyEl) donationsCurrencyEl.addEventListener('change', renderDonations);
+  var donationsCampaignEl = document.getElementById('donations-campaign-filter');
+  if (donationsCampaignEl) donationsCampaignEl.addEventListener('change', renderDonations);
   var donationsSortEl = document.getElementById('donations-sort');
   if (donationsSortEl) donationsSortEl.addEventListener('change', renderDonations);
 
@@ -466,13 +476,14 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
         showToast('info', 'No data', 'There are no donations to export.');
         return;
       }
-      var csv = ['Donor Name,Email,Amount,Currency,Payment Status,Transaction Date'];
+      var csv = ['Donor Name,Email,Amount,Currency,Campaign,Payment Status,Transaction Date'];
       allDonations.forEach(function (d) {
         csv.push([
           csvEscape(d.donor_name || 'Anonymous'),
           csvEscape(d.email || ''),
           d.amount,
           d.currency,
+          csvEscape(d.campaign || 'GENERAL'),
           csvEscape(d.payment_status),
           new Date(d.created_at).toISOString()
         ].join(','));

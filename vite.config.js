@@ -17,6 +17,7 @@ export default defineConfig({
         contact: resolve(__dirname, 'contact.html'),
         news: resolve(__dirname, 'news.html'),
         admin: resolve(__dirname, 'admin.html'),
+        stride: resolve(__dirname, 'stride.html'),
         privacy: resolve(__dirname, 'privacy.html'),
         terms: resolve(__dirname, 'terms.html'),
       },

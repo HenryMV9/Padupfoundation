@@ -41,6 +41,8 @@ interface VerifyBody {
   donor_name?: string;
   donor_email?: string;
   donor_phone?: string;
+  donor_message?: string;
+  campaign?: string;
 }
 
 interface InitializeBody {
@@ -51,6 +53,8 @@ interface InitializeBody {
   donor_name?: string;
   donor_email?: string;
   donor_phone?: string;
+  donor_message?: string;
+  campaign?: string;
 }
 
 interface FlutterwaveVerifyResponse {
@@ -141,12 +145,16 @@ async function recordDonation(supabase: ReturnType<typeof createClient>, params:
   donorName: string | null;
   donorEmail: string | null;
   donorPhone: string | null;
+  donorMessage: string | null;
+  campaign: string;
   paymentStatus: string;
 }): Promise<{ inserted: boolean; error?: string }> {
   const { error } = await supabase.from("donations").insert({
     donor_name: params.donorName,
     email: params.donorEmail,
     donor_phone: params.donorPhone,
+    donor_message: params.donorMessage,
+    campaign: params.campaign,
     amount: params.amount,
     currency: params.currency,
     flutterwave_tx_ref: params.txRef,
@@ -182,10 +190,14 @@ Deno.serve(async (req: Request) => {
     /* ---- Initialize hosted payment (frontend calls this to get checkout link) ---- */
     if (action === "initialize") {
       const body = await req.json().catch(() => ({} as InitializeBody));
-      const { tx_ref, amount, currency, redirect_url, donor_name, donor_email, donor_phone } = body as InitializeBody;
+      const { tx_ref, amount, currency, redirect_url, donor_name, donor_email, donor_phone, donor_message, campaign } = body as InitializeBody;
+      const paymentCampaign = campaign || "GENERAL";
 
       if (!tx_ref || !amount || !currency || !donor_email) {
         return jsonResponse(400, { error: "tx_ref, amount, currency, and donor_email are required" });
+      }
+      if (paymentCampaign !== "GENERAL" && paymentCampaign !== "STRIDE 2026") {
+        return jsonResponse(400, { error: "Invalid campaign" });
       }
 
       const link = await initializeWithFlutterwave({
@@ -196,6 +208,8 @@ Deno.serve(async (req: Request) => {
         donor_name,
         donor_email,
         donor_phone,
+        donor_message,
+        campaign: paymentCampaign,
       });
 
       return jsonResponse(200, { success: true, link });
@@ -204,10 +218,14 @@ Deno.serve(async (req: Request) => {
     /* ---- Verify transaction (frontend callback) ---- */
     if (action === "verify") {
       const body = await req.json().catch(() => ({} as VerifyBody));
-      const { transaction_id, tx_ref, amount, currency, donor_name, donor_email, donor_phone } = body as VerifyBody;
+      const { transaction_id, tx_ref, amount, currency, donor_name, donor_email, donor_phone, donor_message, campaign } = body as VerifyBody;
+      const paymentCampaign = campaign || "GENERAL";
 
       if (!transaction_id || !tx_ref) {
         return jsonResponse(400, { error: "transaction_id and tx_ref are required" });
+      }
+      if (paymentCampaign !== "GENERAL" && paymentCampaign !== "STRIDE 2026") {
+        return jsonResponse(400, { error: "Invalid campaign" });
       }
 
       const verification = await verifyWithFlutterwave(transaction_id);
@@ -221,6 +239,10 @@ Deno.serve(async (req: Request) => {
       }
 
       const tx = verification.data;
+
+      if (tx.tx_ref !== tx_ref) {
+        return jsonResponse(400, { success: false, verified: false, message: "Transaction reference mismatch." });
+      }
 
       if (tx.status !== "successful") {
         return jsonResponse(200, {
@@ -252,6 +274,8 @@ Deno.serve(async (req: Request) => {
         donorName: donor_name || tx.customer?.name || null,
         donorEmail: donor_email || tx.customer?.email || null,
         donorPhone: donor_phone || tx.customer?.phone_number || null,
+        donorMessage: donor_message || null,
+        campaign: paymentCampaign,
         paymentStatus: "successful",
       });
 
@@ -341,6 +365,8 @@ Deno.serve(async (req: Request) => {
         donorName: verifiedTx.customer?.name || null,
         donorEmail: verifiedTx.customer?.email || null,
         donorPhone: verifiedTx.customer?.phone_number || null,
+        donorMessage: null,
+        campaign: "GENERAL",
         paymentStatus: "successful",
       });
 
