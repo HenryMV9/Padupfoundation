@@ -150,10 +150,10 @@
 .admin-body {
   background: var(--gray-50);
   min-height: 100vh;
+  overflow-x: hidden;
 }
 .admin-layout {
-  display: grid;
-  grid-template-columns: 264px 1fr;
+  display: block;
   min-height: 100vh;
 }
 
@@ -292,10 +292,10 @@
 
 /* ---- Main ---- */
 .admin-main {
-  grid-column: 2;
-  padding: var(--space-8);
   margin-left: 264px;
+  padding: var(--space-8);
   min-height: 100vh;
+  min-width: 0;
 }
 .admin-header {
   display: flex;
@@ -326,6 +326,8 @@
   font-size: 1.125rem;
   color: var(--accent);
   cursor: pointer;
+  align-items: center;
+  justify-content: center;
 }
 
 /* ---- Panel Transitions ---- */
@@ -355,6 +357,7 @@
   transition: transform 0.25s, box-shadow 0.25s;
   position: relative;
   overflow: hidden;
+  min-width: 0;
 }
 .stat-card:hover {
   transform: translateY(-4px);
@@ -410,6 +413,7 @@
   box-shadow: 0 1px 3px rgba(15,23,42,0.05);
   border: 1px solid var(--gray-100);
   margin-bottom: var(--space-6);
+  min-width: 0;
 }
 .admin-card-header {
   display: flex;
@@ -478,11 +482,13 @@
   overflow-x: auto;
   border-radius: 12px;
   border: 1px solid var(--gray-100);
+  -webkit-overflow-scrolling: touch;
 }
 .admin-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.875rem;
+  min-width: 500px;
 }
 .admin-table thead th {
   text-align: left;
@@ -566,7 +572,7 @@
 }
 .admin-search-input {
   flex: 1;
-  min-width: 180px;
+  min-width: 160px;
   padding: 0.625rem var(--space-4) 0.625rem 2.25rem;
   border: 1.5px solid var(--gray-200);
   border-radius: 10px;
@@ -608,6 +614,7 @@
   align-items: center;
   justify-content: center;
   margin-right: 4px;
+  flex-shrink: 0;
 }
 .admin-action-btn:hover {
   color: var(--accent);
@@ -653,6 +660,7 @@
   border-radius: 14px;
   padding: var(--space-6);
   border: 1px solid rgba(200,16,46,0.08);
+  min-width: 0;
 }
 .admin-summary-card .stat-card-value {
   font-size: 1.75rem;
@@ -702,6 +710,8 @@
   justify-content: space-between;
   padding: var(--space-5) var(--space-6);
   border-bottom: 1px solid var(--gray-100);
+  flex-wrap: wrap;
+  gap: var(--space-2);
 }
 .admin-modal-header h3 {
   font-size: 1.125rem;
@@ -722,6 +732,7 @@
   background: none;
   border: none;
   cursor: pointer;
+  flex-shrink: 0;
 }
 .admin-modal-close:hover {
   background: var(--gray-100);
@@ -734,6 +745,7 @@
   display: flex;
   justify-content: flex-end;
   gap: var(--space-3);
+  flex-wrap: wrap;
 }
 
 /* ---- Form Controls in Modal ---- */
@@ -934,7 +946,7 @@
 .admin-toast.success .admin-toast-icon { background: var(--success-light); color: var(--success); }
 .admin-toast.error .admin-toast-icon   { background: var(--error-light); color: var(--error); }
 .admin-toast.info .admin-toast-icon    { background: rgba(27,58,92,0.08); color: var(--primary); }
-.admin-toast-body { flex: 1; }
+.admin-toast-body { flex: 1; min-width: 0; }
 .admin-toast-title {
   font-size: 0.875rem;
   font-weight: 700;
@@ -1044,41 +1056,123 @@
 .admin-confirm-delete:hover { background: var(--accent-dark); }
 .admin-confirm-delete:disabled { opacity: 0.55; cursor: not-allowed; }
 
-/* ---- Responsive ---- */
+/* ============================================================
+   RESPONSIVE — Admin Dashboard
+   ============================================================ */
+
+/* ---- Laptop: sidebar stays, but stats tighten ---- */
 @media (max-width: 1200px) {
   .stats-grid { grid-template-columns: repeat(3, 1fr); }
 }
+
+/* ---- Tablet: sidebar hides, content fills width ---- */
 @media (max-width: 900px) {
-  .admin-layout { grid-template-columns: 1fr; }
   .admin-sidebar {
     transform: translateX(-100%);
-    transition: transform 0.3s;
+    transition: transform 0.3s ease;
     box-shadow: 0 24px 48px rgba(0,0,0,0.2);
   }
   .admin-sidebar.open { transform: translateX(0); }
+
   .admin-main {
     margin-left: 0;
     padding: var(--space-6) var(--space-4);
   }
-  .admin-mobile-toggle { display: flex; }
+
+  .admin-mobile-toggle { display: inline-flex; }
+
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
   .admin-gallery-grid { grid-template-columns: repeat(3, 1fr); }
   .admin-summary-row { grid-template-columns: 1fr; }
+
+  .admin-header {
+    flex-wrap: wrap;
+  }
+
+  .admin-header > div:first-child {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .admin-search-bar {
+    flex-direction: column;
+  }
+
+  .admin-search-input,
+  .admin-filter-select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .admin-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-card-header .btn-primary,
+  .admin-card-header .btn-outline,
+  .admin-card-header > div {
+    width: 100%;
+  }
+
+  .admin-card-header > div[style*="display:flex"] {
+    display: flex !important;
+    flex-wrap: wrap;
+  }
+
+  .admin-card-header > div[style*="display:flex"] > button {
+    flex: 1;
+    justify-content: center;
+  }
 }
+
+/* ---- Phone: everything stacks, tables scroll internally ---- */
 @media (max-width: 640px) {
+  .admin-main {
+    padding: var(--space-4) var(--space-3);
+  }
+
   .stats-grid { grid-template-columns: 1fr; }
-  .admin-card { padding: var(--space-4); }
+
+  .admin-card {
+    padding: var(--space-4);
+  }
+
   .admin-header h1 { font-size: 1.25rem; }
+  .admin-header p { font-size: 0.8125rem; }
+
   .admin-gallery-grid { grid-template-columns: repeat(2, 1fr); }
-  .admin-search-bar { flex-direction: column; }
-  .admin-search-input { width: 100%; }
-  .admin-filter-select { width: 100%; }
+
   .admin-modal { max-width: 100%; }
-  .admin-toast-container { left: var(--space-4); right: var(--space-4); }
+
+  .admin-toast-container {
+    left: var(--space-3);
+    right: var(--space-3);
+    top: var(--space-3);
+  }
   .admin-toast { min-width: auto; max-width: none; }
+
+  .admin-table {
+    font-size: 0.8125rem;
+  }
+
+  .admin-modal-body { padding: var(--space-4); }
+  .admin-modal-footer {
+    flex-direction: column;
+  }
+  .admin-modal-footer button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .stat-card-value { font-size: 1.5rem; }
 }
+
+/* ---- Small phone ---- */
 @media (max-width: 380px) {
   .admin-gallery-grid { grid-template-columns: 1fr; }
+  .admin-card { padding: var(--space-3); }
+  .stat-card { padding: var(--space-4); }
 }
 
 /* ---- Overlay for mobile sidebar ---- */
