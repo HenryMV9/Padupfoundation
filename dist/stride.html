@@ -400,7 +400,7 @@
     }
     .stride-amount-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: var(--space-3);
       margin-bottom: var(--space-4);
     }
@@ -519,11 +519,11 @@
       .stride-hero-stat-num { font-size: 2rem; }
     }
   </style>
-  <script type="module" crossorigin src="/assets/stride-DtsR-EvY.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/styles-BkgZ32aD.js">
-  <link rel="modulepreload" crossorigin href="/assets/cursor-BKEpJxUd.js">
-  <link rel="stylesheet" crossorigin href="/assets/styles-CLjVZABY.css">
-  <link rel="stylesheet" crossorigin href="/assets/cursor-DNgKRdBn.css">
+  <script type="module" crossorigin src="/assets/stride-ChMFISRZ.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/styles-CJuVh5h-.js">
+  <link rel="modulepreload" crossorigin href="/assets/cursor-B7vznbtm.js">
+  <link rel="stylesheet" crossorigin href="/assets/styles-DLCWi9-x.css">
+  <link rel="stylesheet" crossorigin href="/assets/cursor-BJYhe4Ug.css">
 </head>
 <body>
 
@@ -675,15 +675,22 @@
           <h3>Make Your STRIDE Donation</h3>
           <p>Choose an amount below or enter your own. All payments are processed securely.</p>
 
-          <!-- Amount Selection -->
+          <!-- Currency Selector (same as donate page) -->
+          <div class="currency-selector-wrap" style="margin-bottom: var(--space-5);">
+            <span class="currency-selector-label"><i class="fas fa-globe"></i> Currency:</span>
+            <select id="stride-currency-selector" class="currency-selector" aria-label="Select donation currency">
+              <option value="NGN" data-symbol="&#8358;" selected>NGN — Nigerian Naira (&#8358;)</option>
+              <option value="USD" data-symbol="$">USD — US Dollar ($)</option>
+              <option value="GBP" data-symbol="&pound;">GBP — British Pound (&pound;)</option>
+              <option value="EUR" data-symbol="&euro;">EUR — Euro (&euro;)</option>
+              <option value="CAD" data-symbol="C$">CAD — Canadian Dollar (C$)</option>
+            </select>
+          </div>
+
+          <!-- Amount Selection (dynamic via JS) -->
           <div style="margin-bottom: var(--space-5);">
-            <label style="display: block; margin-bottom: var(--space-3); font-weight: 600; font-family: var(--font-heading); color: var(--gray-700);">Select Amount (NGN)</label>
-            <div class="stride-amount-grid" id="stride-amount-grid">
-              <button class="stride-amount-btn" data-amount="10000">&#8358;10,000</button>
-              <button class="stride-amount-btn selected" data-amount="25000">&#8358;25,000</button>
-              <button class="stride-amount-btn" data-amount="50000">&#8358;50,000</button>
-              <button class="stride-amount-btn" data-amount="100000">&#8358;100,000</button>
-            </div>
+            <label style="display: block; margin-bottom: var(--space-3); font-weight: 600; font-family: var(--font-heading); color: var(--gray-700);" id="stride-amount-label">Select Amount (&#8358;)</label>
+            <div class="stride-amount-grid" id="stride-amount-grid"></div>
             <div class="form-group" style="margin-top: var(--space-3);">
               <input type="number" id="stride-custom-amount" class="form-control" placeholder="Or enter custom amount (&#8358;)" min="1000" aria-label="Custom donation amount" />
             </div>
@@ -824,11 +831,13 @@
   </style>
 
   <!-- Lightbox -->
-  <div class="lightbox" id="lightbox" style="display:none;">
-    <button class="lightbox-close" aria-label="Close"><i class="fas fa-times"></i></button>
-    <button class="lightbox-nav prev" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
-    <img class="lightbox-img" src="" alt="" />
-    <button class="lightbox-nav next" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
+  <div class="lightbox" id="stride-lightbox">
+    <div class="lightbox-content">
+      <button class="lightbox-close" aria-label="Close"><i class="fas fa-times"></i></button>
+      <button class="lightbox-nav prev" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
+      <img class="lightbox-img" src="" alt="" />
+      <button class="lightbox-nav next" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
+    </div>
   </div>
 
 </body>
