@@ -957,6 +957,62 @@
 }
 
 /* ============================================================
+   MOBILE CONTENT FIT
+   ============================================================ */
+@media (max-width: 640px) {
+  .currency-selector-wrap {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-2);
+  }
+
+  .currency-selector-label,
+  .currency-selector {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .donation-form-card,
+  .stride-donate-form,
+  .donate-grid,
+  .stride-donate-grid {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .impact-card-sm,
+  .impact-card-sm > div,
+  .stride-donate-perk {
+    min-width: 0;
+  }
+
+  .impact-card-sm > div:last-child,
+  .impact-card-sm p,
+  .stride-donate-perk {
+    overflow-wrap: anywhere;
+  }
+
+  .form-control,
+  input,
+  select,
+  textarea {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .stride-amount-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .stride-donate-form .stride-amount-btn,
+  .amount-grid .amount-btn {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* ============================================================
    PREMIUM SCROLL ANIMATION ENHANCEMENTS
    ============================================================ */
 .reveal.fade-in {

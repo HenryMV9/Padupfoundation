@@ -2117,4 +2117,40 @@ textarea.form-control {
   .stride-gallery-grid { grid-template-columns: 1fr 1fr !important; }
   .stride-provides-grid { grid-template-columns: 1fr !important; }
   .stride-donate-form { padding: var(--space-6) !important; }
+
+  /* Donate page: remove side borders on stacked impact context items */
+  .donate-grid [style*="border-left"],
+  .donate-grid [style*="border-right"] {
+    border-left: none !important;
+    border-right: none !important;
+  }
+
+  /* Donate page: ensure impact cards wrap text properly */
+  .impact-card-sm {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  .impact-card-sm-icon {
+    margin-bottom: var(--space-2);
+  }
+
+  /* Ensure all inputs and selects never overflow their container */
+  input[type="text"],
+  input[type="email"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="password"],
+  select,
+  textarea {
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* Prevent any child from overflowing its grid cell */
+  .donate-grid > *,
+  .stride-donate-grid > * {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
 }
