@@ -1,29 +1,64 @@
 /* ============================================================
    PAD UP FOUNDATION — STRIDE 2026 Page
+   - Same currency selector + dynamic presets as donate page
    - Flutterwave hosted checkout (campaign: STRIDE 2026)
    - Server-side verification and recording
-   - Currency converter with live-ish static rates
-   - Lightbox for gallery images
+   - Lightbox for gallery images (uses .open class, not display)
    ============================================================ */
 
 (function initStride() {
-  /* ---- Campaign constant ---- */
   var CAMPAIGN = 'STRIDE 2026';
-  var CURRENCY = 'NGN';
 
-  /* ---- Amount selection ---- */
-  var selectedAmount = 25000;
+  // ============================================================
+  // CURRENCY PRESETS (same as donate page)
+  // ============================================================
+  var CURRENCY_PRESETS = {
+    NGN: { symbol: '\u20A6', amounts: [10000, 25000, 50000, 100000, 250000, 500000], min: 1000 },
+    USD: { symbol: '$', amounts: [10, 25, 50, 100, 250, 500], min: 1 },
+    GBP: { symbol: '\u00A3', amounts: [10, 25, 50, 100, 200, 400], min: 1 },
+    EUR: { symbol: '\u20AC', amounts: [10, 25, 50, 100, 250, 500], min: 1 },
+    CAD: { symbol: 'C$', amounts: [15, 30, 60, 120, 300, 600], min: 1 }
+  };
+
+  var currencySelector = document.getElementById('stride-currency-selector');
   var amountGrid = document.getElementById('stride-amount-grid');
+  var amountLabel = document.getElementById('stride-amount-label');
   var customInput = document.getElementById('stride-custom-amount');
+  var donateBtn = document.getElementById('stride-donate-btn');
+  var selectedCurrency = 'NGN';
+  var selectedAmount = 25000;
 
-  if (amountGrid) {
-    amountGrid.querySelectorAll('.stride-amount-btn').forEach(function (btn) {
+  function formatAmount(amount, currency) {
+    var preset = CURRENCY_PRESETS[currency] || CURRENCY_PRESETS.NGN;
+    return preset.symbol + Number(amount).toLocaleString();
+  }
+
+  function updateAmountButtons() {
+    if (!amountGrid) return;
+    var preset = CURRENCY_PRESETS[selectedCurrency];
+    amountGrid.innerHTML = '';
+    preset.amounts.forEach(function (amt, i) {
+      var btn = document.createElement('button');
+      btn.className = 'stride-amount-btn' + (i === 1 ? ' selected' : '');
+      btn.dataset.amount = amt;
+      btn.textContent = formatAmount(amt, selectedCurrency);
       btn.addEventListener('click', function () {
         amountGrid.querySelectorAll('.stride-amount-btn').forEach(function (b) { b.classList.remove('selected'); });
         btn.classList.add('selected');
-        selectedAmount = parseFloat(btn.dataset.amount);
+        selectedAmount = amt;
         if (customInput) customInput.value = '';
       });
+      amountGrid.appendChild(btn);
+    });
+    selectedAmount = preset.amounts[1];
+    if (amountLabel) amountLabel.textContent = 'Select Amount (' + preset.symbol + ')';
+    if (customInput) customInput.placeholder = 'Or enter custom amount (' + preset.symbol + ')';
+  }
+
+  if (currencySelector) {
+    currencySelector.addEventListener('change', function () {
+      selectedCurrency = this.value;
+      updateAmountButtons();
     });
   }
 
@@ -32,11 +67,15 @@
       if (amountGrid) {
         amountGrid.querySelectorAll('.stride-amount-btn').forEach(function (b) { b.classList.remove('selected'); });
       }
-      selectedAmount = parseFloat(customInput.value) || 0;
+      selectedAmount = parseFloat(this.value) || 0;
     });
   }
 
-  /* ---- Feedback helpers ---- */
+  updateAmountButtons();
+
+  // ============================================================
+  // FEEDBACK
+  // ============================================================
   function showFeedback(type, message) {
     var successEl = document.getElementById('stride-success-msg');
     var errorEl = document.getElementById('stride-error-msg');
@@ -46,7 +85,7 @@
     if (type === 'success') {
       if (successEl) {
         var amountSpan = successEl.querySelector('.stride-amount');
-        if (amountSpan) amountSpan.textContent = '\u20A6' + Number(message.amount).toLocaleString();
+        if (amountSpan) amountSpan.textContent = formatAmount(message.amount, message.currency || selectedCurrency);
         successEl.style.display = 'flex';
       }
     } else {
@@ -59,7 +98,9 @@
     }
   }
 
-  /* ---- Flutterwave payment flow ---- */
+  // ============================================================
+  // FLUTTERWAVE PAYMENT
+  // ============================================================
   function getApiUrl(action) {
     return (import.meta.env.VITE_SUPABASE_URL || '') + '/functions/v1/flutterwave-verify/' + action;
   }
@@ -68,12 +109,12 @@
     return 'Bearer ' + (import.meta.env.VITE_SUPABASE_ANON_KEY || '');
   }
 
-  async function initializePayment(amount, name, email, phone, message) {
+  async function initializePayment(amount, currency, name, email, phone, message) {
     var txRef = 'stride-' + Date.now();
 
     sessionStorage.setItem('stride_pending_tx_ref', txRef);
     sessionStorage.setItem('stride_pending_amount', String(amount));
-    sessionStorage.setItem('stride_pending_currency', CURRENCY);
+    sessionStorage.setItem('stride_pending_currency', currency);
     sessionStorage.setItem('stride_pending_name', name);
     sessionStorage.setItem('stride_pending_email', email);
     sessionStorage.setItem('stride_pending_phone', phone);
@@ -88,7 +129,7 @@
       body: JSON.stringify({
         tx_ref: txRef,
         amount: amount,
-        currency: CURRENCY,
+        currency: currency,
         donor_name: name,
         donor_email: email,
         donor_phone: phone,
@@ -132,8 +173,9 @@
     return data;
   }
 
-  /* ---- Donate button ---- */
-  var donateBtn = document.getElementById('stride-donate-btn');
+  // ============================================================
+  // DONATE BUTTON
+  // ============================================================
   if (donateBtn) {
     donateBtn.addEventListener('click', async function () {
       var nameEl = document.getElementById('stride-donor-name');
@@ -152,8 +194,9 @@
         return;
       }
 
-      if (!selectedAmount || selectedAmount < 1000) {
-        showFeedback('error', 'Please select or enter a donation amount of at least \u20A61,000.');
+      var preset = CURRENCY_PRESETS[selectedCurrency];
+      if (!selectedAmount || selectedAmount < preset.min) {
+        showFeedback('error', 'Please select or enter a donation amount of at least ' + formatAmount(preset.min, selectedCurrency) + '.');
         return;
       }
 
@@ -162,7 +205,7 @@
       donateBtn.disabled = true;
 
       try {
-        var link = await initializePayment(selectedAmount, name, email, phone, message);
+        var link = await initializePayment(selectedAmount, selectedCurrency, name, email, phone, message);
         window.location.href = link;
       } catch (err) {
         console.error('[STRIDE] Payment init error:', err.message);
@@ -173,7 +216,9 @@
     });
   }
 
-  /* ---- Handle redirect-back verification ---- */
+  // ============================================================
+  // HANDLE REDIRECT-BACK VERIFICATION
+  // ============================================================
   async function handleRedirectReturn() {
     var pendingTxRef = sessionStorage.getItem('stride_pending_tx_ref');
     if (!pendingTxRef) return;
@@ -215,7 +260,7 @@
         );
 
         if (result.verified && result.success) {
-          showFeedback('success', { amount: result.amount || pendingAmount });
+          showFeedback('success', { amount: result.amount || pendingAmount, currency: result.currency || pendingCurrency });
         } else if (result.verified && !result.success) {
           showFeedback('error', result.message || 'The transaction was not successful.');
         } else {
@@ -237,78 +282,11 @@
 
   handleRedirectReturn();
 
-  /* ============================================================
-     CURRENCY CONVERTER
-     Uses approximate static rates (NGN as base).
-     Rates are indicative — not for financial transactions.
-     ============================================================ */
-  var RATES_TO_NGN = {
-    NGN: 1,
-    USD: 1500,
-    GBP: 1900,
-    EUR: 1620,
-    CAD: 1100
-  };
-
-  var SYMBOLS = {
-    NGN: '\u20A6',
-    USD: '$',
-    GBP: '\u00A3',
-    EUR: '\u20AC',
-    CAD: 'C$'
-  };
-
-  var fromAmountEl = document.getElementById('converter-from-amount');
-  var fromCurrencyEl = document.getElementById('converter-from-currency');
-  var resultValueEl = document.getElementById('converter-result-value');
-  var resultRateEl = document.getElementById('converter-rate');
-  var swapBtn = document.getElementById('converter-swap-btn');
-
-  function formatCurrency(amount, currency) {
-    var sym = SYMBOLS[currency] || '';
-    return sym + Number(amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  }
-
-  function convert() {
-    if (!fromAmountEl || !fromCurrencyEl || !resultValueEl) return;
-    var amount = parseFloat(fromAmountEl.value) || 0;
-    var fromCurrency = fromCurrencyEl.value;
-    var rate = RATES_TO_NGN[fromCurrency] || 1;
-    var ngnAmount = amount * rate;
-
-    resultValueEl.textContent = formatCurrency(ngnAmount, 'NGN');
-
-    if (resultRateEl) {
-      if (fromCurrency === 'NGN') {
-        resultRateEl.textContent = '1 NGN = 1.00 NGN';
-      } else {
-        resultRateEl.textContent = '1 ' + fromCurrency + ' = \u20A6' + rate.toLocaleString() + ' (approximate)';
-      }
-    }
-  }
-
-  if (fromAmountEl) fromAmountEl.addEventListener('input', convert);
-  if (fromCurrencyEl) fromCurrencyEl.addEventListener('change', convert);
-  if (swapBtn) {
-    swapBtn.addEventListener('click', function () {
-      if (!fromCurrencyEl || !resultValueEl) return;
-      var currentCurrency = fromCurrencyEl.value;
-      if (currentCurrency === 'NGN') {
-        fromCurrencyEl.value = 'USD';
-      } else {
-        fromCurrencyEl.value = 'NGN';
-      }
-      convert();
-    });
-  }
-
-  convert();
-
-  /* ============================================================
-     LIGHTBOX (minimal — reuses existing CSS classes)
-     ============================================================ */
+  // ============================================================
+  // LIGHTBOX (uses .open class — same as gallery page)
+  // ============================================================
   var galleryItems = document.querySelectorAll('.stride-gallery-item[data-lightbox]');
-  var lightbox = document.getElementById('lightbox');
+  var lightbox = document.getElementById('stride-lightbox');
   var lightboxImg = lightbox ? lightbox.querySelector('.lightbox-img') : null;
   var lightboxClose = lightbox ? lightbox.querySelector('.lightbox-close') : null;
   var currentLightboxIndex = 0;
@@ -323,19 +301,18 @@
   });
 
   function openLightbox(index) {
+    if (!lightbox || !lightboxImg) return;
     currentLightboxIndex = index;
-    if (lightbox && lightboxImg) {
-      lightboxImg.src = lightboxImages[index];
-      lightbox.style.display = 'flex';
-      document.body.style.overflow = 'hidden';
-    }
+    lightboxImg.src = lightboxImages[index];
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';
   }
 
   function closeLightbox() {
-    if (lightbox) {
-      lightbox.style.display = 'none';
-      document.body.style.overflow = '';
-    }
+    if (!lightbox) return;
+    lightbox.classList.remove('open');
+    document.body.style.overflow = '';
+    setTimeout(function () { if (lightboxImg) lightboxImg.src = ''; }, 300);
   }
 
   function navLightbox(dir) {
@@ -355,7 +332,7 @@
   }
 
   document.addEventListener('keydown', function (e) {
-    if (!lightbox || lightbox.style.display === 'none') return;
+    if (!lightbox || !lightbox.classList.contains('open')) return;
     if (e.key === 'Escape') closeLightbox();
     if (e.key === 'ArrowLeft') navLightbox(-1);
     if (e.key === 'ArrowRight') navLightbox(1);

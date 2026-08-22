@@ -17,63 +17,73 @@ import { supabase } from './supabase-client.js';
   if (!grid) return;
 
   // ============================================================
-  // LIGHTBOX
+  // LIGHTBOX STATE (hoisted to IIFE scope so refreshGalleryItems can access)
   // ============================================================
   var currentIndex = 0;
   var images = [];
   var touchStartX = 0;
   var touchDiff = 0;
+  var counter = null;
 
   if (lightbox && lightboxImg) {
-    var counter = document.createElement('div');
-    counter.className = 'lightbox-counter';
-    lightbox.querySelector('.lightbox-content').appendChild(counter);
-
-    function updateCounter() {
-      counter.textContent = (currentIndex + 1) + ' / ' + images.length;
+    var contentEl = lightbox.querySelector('.lightbox-content');
+    if (contentEl) {
+      counter = document.createElement('div');
+      counter.className = 'lightbox-counter';
+      contentEl.appendChild(counter);
     }
+  }
 
-    function openLightbox(index) {
-      currentIndex = index;
-      lightboxImg.src = images[index].src;
-      lightboxImg.alt = images[index].alt || '';
+  function updateCounter() {
+    if (counter) counter.textContent = (currentIndex + 1) + ' / ' + images.length;
+  }
+
+  function openLightbox(index) {
+    if (!lightbox || !lightboxImg) return;
+    currentIndex = index;
+    lightboxImg.src = images[index].src;
+    lightboxImg.alt = images[index].alt || '';
+    updateCounter();
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    if (!lightbox) return;
+    lightbox.classList.remove('open');
+    document.body.style.overflow = '';
+    setTimeout(function () { if (lightboxImg) lightboxImg.src = ''; }, 300);
+  }
+
+  function showPrev() {
+    currentIndex = (currentIndex - 1 + images.length) % images.length;
+    if (!lightboxImg) return;
+    lightboxImg.style.opacity = '0';
+    lightboxImg.style.transform = 'scale(0.96) translateX(20px)';
+    setTimeout(function () {
+      lightboxImg.src = images[currentIndex].src;
+      lightboxImg.alt = images[currentIndex].alt || '';
+      lightboxImg.style.opacity = '1';
+      lightboxImg.style.transform = 'scale(1) translateX(0)';
       updateCounter();
-      lightbox.classList.add('open');
-      document.body.style.overflow = 'hidden';
-    }
+    }, 180);
+  }
 
-    function closeLightbox() {
-      lightbox.classList.remove('open');
-      document.body.style.overflow = '';
-      setTimeout(function () { lightboxImg.src = ''; }, 300);
-    }
+  function showNext() {
+    currentIndex = (currentIndex + 1) % images.length;
+    if (!lightboxImg) return;
+    lightboxImg.style.opacity = '0';
+    lightboxImg.style.transform = 'scale(0.96) translateX(-20px)';
+    setTimeout(function () {
+      lightboxImg.src = images[currentIndex].src;
+      lightboxImg.alt = images[currentIndex].alt || '';
+      lightboxImg.style.opacity = '1';
+      lightboxImg.style.transform = 'scale(1) translateX(0)';
+      updateCounter();
+    }, 180);
+  }
 
-    function showPrev() {
-      currentIndex = (currentIndex - 1 + images.length) % images.length;
-      lightboxImg.style.opacity = '0';
-      lightboxImg.style.transform = 'scale(0.96) translateX(20px)';
-      setTimeout(function () {
-        lightboxImg.src = images[currentIndex].src;
-        lightboxImg.alt = images[currentIndex].alt || '';
-        lightboxImg.style.opacity = '1';
-        lightboxImg.style.transform = 'scale(1) translateX(0)';
-        updateCounter();
-      }, 180);
-    }
-
-    function showNext() {
-      currentIndex = (currentIndex + 1) % images.length;
-      lightboxImg.style.opacity = '0';
-      lightboxImg.style.transform = 'scale(0.96) translateX(-20px)';
-      setTimeout(function () {
-        lightboxImg.src = images[currentIndex].src;
-        lightboxImg.alt = images[currentIndex].alt || '';
-        lightboxImg.style.opacity = '1';
-        lightboxImg.style.transform = 'scale(1) translateX(0)';
-        updateCounter();
-      }, 180);
-    }
-
+  if (lightbox && lightboxImg) {
     lightboxImg.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
 
     if (closeBtn) closeBtn.addEventListener('click', closeLightbox);
@@ -117,6 +127,12 @@ import { supabase } from './supabase-client.js';
       item.removeEventListener('click', item._lightboxHandler);
       item._lightboxHandler = function () { openLightbox(i); };
       item.addEventListener('click', item._lightboxHandler);
+
+      item.removeEventListener('keydown', item._lightboxKeyHandler);
+      item._lightboxKeyHandler = function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(i); }
+      };
+      item.addEventListener('keydown', item._lightboxKeyHandler);
     });
   }
 
@@ -188,7 +204,6 @@ import { supabase } from './supabase-client.js';
 
       if (error) throw error;
 
-      // Clear all existing items — DB is the single source of truth
       grid.innerHTML = '';
 
       if (!data || data.length === 0) {
@@ -211,7 +226,6 @@ import { supabase } from './supabase-client.js';
         grid.appendChild(item);
       });
 
-      // Trigger scroll reveal animation
       var observer = new IntersectionObserver(function (entries) {
         entries.forEach(function (entry) {
           if (entry.isIntersecting) {
@@ -222,7 +236,6 @@ import { supabase } from './supabase-client.js';
       }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
       grid.querySelectorAll('.masonry-item:not(.revealed)').forEach(function (el) { observer.observe(el); });
 
-      // Notify lightbox and filters to pick up new items
       window.dispatchEvent(new CustomEvent('gallery:refresh'));
     } catch (err) {
       console.error('[Gallery] Failed to load images:', err.message);
@@ -231,7 +244,7 @@ import { supabase } from './supabase-client.js';
   }
 
   // ============================================================
-  // REALTIME — live-update gallery when images change
+  // REALTIME
   // ============================================================
   supabase
     .channel('gallery-page-changes')
