@@ -39,8 +39,10 @@
 
 .founder-portrait-img {
   width: 100%;
-  height: 560px;
-  object-fit: cover;
+  height: auto;
+  max-height: 820px;
+  object-fit: contain;
+  background: var(--gray-100);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-xl);
 }
@@ -161,8 +163,9 @@
 
 .founder-book-cover {
   width: 100%;
-  height: 240px;
-  object-fit: cover;
+  height: auto;
+  max-height: 420px;
+  object-fit: contain;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
 }
