@@ -13,13 +13,15 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <script type="module" crossorigin src="/assets/donate-U6AABRW3.js"></script>
+  <script type="module" crossorigin src="/assets/donate-B21UBP2H.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/styles-mSiBjQqE.js">
-  <link rel="modulepreload" crossorigin href="/assets/cursor-t_YCDCCe.js">
-  <link rel="modulepreload" crossorigin href="/assets/forms-CG0OuXLd.js">
+  <link rel="modulepreload" crossorigin href="/assets/cursor-32zDEAie.js">
+  <link rel="modulepreload" crossorigin href="/assets/forms-3iYDuope.js">
   <link rel="modulepreload" crossorigin href="/assets/supabase-client-CDcWUE7U.js">
+  <link rel="modulepreload" crossorigin href="/assets/copy-clipboard-CdjWch5C.js">
   <link rel="stylesheet" crossorigin href="/assets/styles-C7rgfNKa.css">
-  <link rel="stylesheet" crossorigin href="/assets/cursor-DuZoBgZu.css">
+  <link rel="stylesheet" crossorigin href="/assets/cursor-DG0vMJPB.css">
+  <link rel="stylesheet" crossorigin href="/assets/additions-DUuZLjjb.css">
 </head>
 <body>
 
@@ -166,6 +168,42 @@
             <div class="secure-badge"><i class="fas fa-lock"></i> Secure Payment</div>
             <div class="secure-badge"><i class="fas fa-check-circle"></i> Flutterwave Verified</div>
           </div>
+        </div>
+
+        <!-- Bank Transfer Details -->
+        <div class="bank-transfer-card reveal from-right" style="grid-column: 1 / -1; margin-top: var(--space-6);">
+          <div class="bank-transfer-header">
+            <div class="bank-transfer-icon"><i class="fas fa-building-columns"></i></div>
+            <div>
+              <h3>Prefer a Bank Transfer?</h3>
+              <p>Use these account details to donate directly. Tap an account number to copy it.</p>
+            </div>
+          </div>
+          <div class="bank-transfer-accounts">
+            <div class="bank-account-card" data-account="1018702717">
+              <div class="bank-account-label">Naira (NGN)</div>
+              <div class="bank-account-number">
+                <span class="copyable-account" id="naira-account">1018702717</span>
+                <button class="copy-btn" data-copy="1018702717" aria-label="Copy Naira account number">
+                  <i class="fas fa-copy"></i>
+                </button>
+              </div>
+              <div class="bank-account-name">Pad Up Foundation</div>
+              <div class="bank-account-bank">Zenith Bank</div>
+            </div>
+            <div class="bank-account-card" data-account="5072354475">
+              <div class="bank-account-label">USD (Domiciliary)</div>
+              <div class="bank-account-number">
+                <span class="copyable-account" id="usd-account">5072354475</span>
+                <button class="copy-btn" data-copy="5072354475" aria-label="Copy USD account number">
+                  <i class="fas fa-copy"></i>
+                </button>
+              </div>
+              <div class="bank-account-name">Pad Up Foundation</div>
+              <div class="bank-account-bank">Zenith Bank</div>
+            </div>
+          </div>
+          <p class="bank-transfer-note"><i class="fas fa-info-circle"></i> After transferring, please send your receipt to <a href="mailto:info@padupfoundation.org">info@padupfoundation.org</a> so we can confirm and acknowledge your donation.</p>
         </div>
 
         <!-- Impact Sidebar -->
@@ -363,7 +401,7 @@
         </address>
       </div>
       <div class="footer-bottom">
-        <p>&copy; 2026 Pad Up Foundation. All rights reserved.</p>
+        <p>&copy; 2026 Pad Up Foundation. Registered Incorporated Trustees (CAC/IT/NO 153823). SCUML Reg No: SC 331403823.</p>
         <div class="footer-bottom-links">
           <a href="privacy.html">Privacy Policy</a>
           <a href="terms.html">Terms &amp; Conditions</a>
