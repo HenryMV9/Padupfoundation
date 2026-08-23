@@ -94,6 +94,7 @@ async function verifyWithFlutterwave(transactionId: number): Promise<Flutterwave
 
   if (!res.ok) {
     const errText = await res.text();
+    console.error("[Flutterwave] Verify FAILED:", { http_status: res.status, response: errText.slice(0, 500) });
     throw new Error(`Flutterwave verify failed (${res.status}): ${errText}`);
   }
 
@@ -104,15 +105,49 @@ async function initializeWithFlutterwave(body: InitializeBody) {
   const secretKey = Deno.env.get("FLUTTERWAVE_SECRET_KEY");
   if (!secretKey) throw new Error("FLUTTERWAVE_SECRET_KEY not configured");
 
-  // Build customer object — omit phone_number entirely when empty,
-  // because Flutterwave returns 400 for an empty-string phone.
-  const customer: { email: string; name?: string; phone_number?: string } = {
-    email: body.donor_email,
+  // Build customer object using Flutterwave's documented field names.
+  // The field is "phonenumber" (no underscore) per Flutterwave v3 docs.
+  // Omit phonenumber entirely when empty — Flutterwave rejects empty strings.
+  const customer: Record<string, string> = {
+    email: body.donor_email!,
   };
-  if (body.donor_name) customer.name = body.donor_name;
-  if (body.donor_phone && body.donor_phone.trim()) customer.phone_number = body.donor_phone.trim();
+  if (body.donor_name && body.donor_name.trim()) customer.name = body.donor_name.trim();
+  if (body.donor_phone && body.donor_phone.trim()) customer.phonenumber = body.donor_phone.trim();
 
   const isStride = body.campaign === "STRIDE 2026";
+  const campaignLabel = isStride ? "STRIDE 2026" : "General Donation";
+
+  const payload = {
+    tx_ref: body.tx_ref,
+    amount: String(Number(body.amount)),
+    currency: body.currency || "NGN",
+    redirect_url: body.redirect_url,
+    payment_options: "card, banktransfer, ussd",
+    customer,
+    meta: {
+      consumer_id: body.tx_ref,
+      campaign: campaignLabel,
+    },
+    customizations: {
+      title: isStride ? "STRIDE 2026 — Pad Up Foundation" : "Pad Up Foundation",
+      description: isStride
+        ? `${campaignLabel} — Supporting girls' education and menstrual health`
+        : "Donation — Ending Period Poverty",
+      logo: "https://padupfoundation.org/images/Padupfoundation-LOGO.jpg",
+    },
+  };
+
+  console.log("[Flutterwave] Initialize payload:", JSON.stringify({
+    tx_ref: payload.tx_ref,
+    amount: payload.amount,
+    currency: payload.currency,
+    redirect_url: payload.redirect_url,
+    payment_options: payload.payment_options,
+    customer_email: customer.email,
+    customer_has_phone: !!customer.phonenumber,
+    customer_has_name: !!customer.name,
+    campaign: campaignLabel,
+  }));
 
   const res = await fetch("https://api.flutterwave.com/v3/payments", {
     method: "POST",
@@ -120,27 +155,25 @@ async function initializeWithFlutterwave(body: InitializeBody) {
       "Authorization": `Bearer ${secretKey}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      tx_ref: body.tx_ref,
-      amount: Number(body.amount),
-      currency: body.currency,
-      redirect_url: body.redirect_url,
-      payment_options: "card,banktransfer,ussd,mobilemoney",
-      customer,
-      customizations: {
-        title: isStride ? "STRIDE 2026 — Pad Up Foundation" : "Pad Up Foundation",
-        description: isStride ? "Donation — STRIDE 2026 Campaign" : "Donation — Ending Period Poverty",
-        logo: "https://padupfoundation.org/images/Padupfoundation-LOGO.jpg",
-      },
-    }),
+    body: JSON.stringify(payload),
   });
 
   const result = await res.json().catch(() => ({}));
+
   if (!res.ok || result.status !== "success" || !result.data?.link) {
+    // Log full Flutterwave error response (no secrets) for diagnostics
+    console.error("[Flutterwave] Initialize FAILED:", JSON.stringify({
+      http_status: res.status,
+      flw_status: result.status,
+      flw_message: result.message,
+      flw_data_message: result.data?.message,
+      flw_errors: result.errors,
+    }));
     const detail = result.message || result.data?.message || `HTTP ${res.status}`;
     throw new Error(`Flutterwave payment setup failed: ${detail}`);
   }
 
+  console.log("[Flutterwave] Initialize SUCCESS — link generated for tx_ref:", body.tx_ref);
   return result.data.link as string;
 }
 
@@ -240,9 +273,14 @@ Deno.serve(async (req: Request) => {
         return jsonResponse(400, { error: "Invalid campaign" });
       }
 
+      console.log("[Flutterwave] Verifying transaction:", { transaction_id, tx_ref, campaign: paymentCampaign });
       const verification = await verifyWithFlutterwave(transaction_id);
 
       if (verification.status !== "success" || !verification.data) {
+        console.error("[Flutterwave] Verify response NOT success:", {
+          flw_status: verification.status,
+          flw_message: verification.message,
+        });
         return jsonResponse(400, {
           success: false,
           verified: false,
@@ -251,6 +289,10 @@ Deno.serve(async (req: Request) => {
       }
 
       const tx = verification.data;
+      console.log("[Flutterwave] Verified OK:", {
+        tx_id: tx.id, tx_ref: tx.tx_ref, amount: tx.amount,
+        currency: tx.currency, status: tx.status, payment_type: tx.payment_type,
+      });
 
       if (tx.tx_ref !== tx_ref) {
         return jsonResponse(400, { success: false, verified: false, message: "Transaction reference mismatch." });
