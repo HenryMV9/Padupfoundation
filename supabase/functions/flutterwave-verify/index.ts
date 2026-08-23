@@ -104,6 +104,16 @@ async function initializeWithFlutterwave(body: InitializeBody) {
   const secretKey = Deno.env.get("FLUTTERWAVE_SECRET_KEY");
   if (!secretKey) throw new Error("FLUTTERWAVE_SECRET_KEY not configured");
 
+  // Build customer object — omit phone_number entirely when empty,
+  // because Flutterwave returns 400 for an empty-string phone.
+  const customer: { email: string; name?: string; phone_number?: string } = {
+    email: body.donor_email,
+  };
+  if (body.donor_name) customer.name = body.donor_name;
+  if (body.donor_phone && body.donor_phone.trim()) customer.phone_number = body.donor_phone.trim();
+
+  const isStride = body.campaign === "STRIDE 2026";
+
   const res = await fetch("https://api.flutterwave.com/v3/payments", {
     method: "POST",
     headers: {
@@ -112,26 +122,23 @@ async function initializeWithFlutterwave(body: InitializeBody) {
     },
     body: JSON.stringify({
       tx_ref: body.tx_ref,
-      amount: body.amount,
+      amount: Number(body.amount),
       currency: body.currency,
       redirect_url: body.redirect_url,
       payment_options: "card,banktransfer,ussd,mobilemoney",
-      customer: {
-        email: body.donor_email,
-        phone_number: body.donor_phone,
-        name: body.donor_name,
-      },
+      customer,
       customizations: {
-        title: "Pad Up Foundation",
-        description: "Donation — Ending Period Poverty",
-        logo: `${new URL(body.redirect_url || "https://padupfoundation.org").origin}/images/Padupfoundation-LOGO.jpg`,
+        title: isStride ? "STRIDE 2026 — Pad Up Foundation" : "Pad Up Foundation",
+        description: isStride ? "Donation — STRIDE 2026 Campaign" : "Donation — Ending Period Poverty",
+        logo: "https://padupfoundation.org/images/Padupfoundation-LOGO.jpg",
       },
     }),
   });
 
   const result = await res.json().catch(() => ({}));
   if (!res.ok || result.status !== "success" || !result.data?.link) {
-    throw new Error(result.message || `Flutterwave payment setup failed (${res.status})`);
+    const detail = result.message || result.data?.message || `HTTP ${res.status}`;
+    throw new Error(`Flutterwave payment setup failed: ${detail}`);
   }
 
   return result.data.link as string;
@@ -200,9 +207,14 @@ Deno.serve(async (req: Request) => {
         return jsonResponse(400, { error: "Invalid campaign" });
       }
 
+      const numericAmount = Number(amount);
+      if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
+        return jsonResponse(400, { error: "amount must be a positive number" });
+      }
+
       const link = await initializeWithFlutterwave({
         tx_ref,
-        amount: Number(amount),
+        amount: numericAmount,
         currency,
         redirect_url: redirect_url || `${url.origin}/donate.html`,
         donor_name,

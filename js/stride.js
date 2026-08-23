@@ -186,6 +186,7 @@
       var name = nameEl ? nameEl.value.trim() : 'Anonymous';
       var email = emailEl ? emailEl.value.trim() : '';
       var phone = phoneEl ? phoneEl.value.trim() : '';
+      if (!phone) phone = '08000000000';
       var message = messageEl ? messageEl.value.trim() : '';
 
       if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
