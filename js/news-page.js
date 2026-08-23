@@ -3,6 +3,7 @@
    Handles /news.html (listing) and /news.html?id=<uuid> (detail)
    Text-only cards — no featured images.
    Uses Supabase Realtime to live-update when articles change.
+   Shows skeleton placeholders while loading.
    ============================================================ */
 
 import { supabase } from './supabase-client.js';
@@ -49,6 +50,22 @@ import { supabase } from './supabase-client.js';
     return card;
   }
 
+  function showSkeletons() {
+    if (empty) empty.style.display = 'none';
+    grid.innerHTML = '';
+    for (var i = 0; i < 6; i++) {
+      var skel = document.createElement('div');
+      skel.className = 'skeleton-news-card';
+      skel.innerHTML =
+        '<div class="skeleton-shimmer skel-line short"></div>' +
+        '<div class="skeleton-shimmer skel-title"></div>' +
+        '<div class="skeleton-shimmer skel-line long"></div>' +
+        '<div class="skeleton-shimmer skel-line long"></div>' +
+        '<div class="skeleton-shimmer skel-line medium"></div>';
+      grid.appendChild(skel);
+    }
+  }
+
   async function loadListing() {
     try {
       const { data, error } = await supabase
@@ -79,6 +96,7 @@ import { supabase } from './supabase-client.js';
         empty.innerHTML = '<i class="fas fa-exclamation-circle"></i><p>Unable to load news at this time. Please check back later.</p>';
         empty.style.display = 'block';
       }
+      grid.innerHTML = '';
     }
   }
 
@@ -95,7 +113,6 @@ import { supabase } from './supabase-client.js';
       if (error) throw error;
 
       if (!data) {
-        // Article deleted or unpublished — go back to listing
         window.history.replaceState({}, document.title, 'news.html');
         if (listingSection) listingSection.style.display = 'block';
         if (detailSection) detailSection.style.display = 'none';
@@ -136,9 +153,6 @@ import { supabase } from './supabase-client.js';
     grid.querySelectorAll('.news-card').forEach(function (el) { observer.observe(el); });
   }
 
-  // ============================================================
-  // REALTIME — live-update listing when articles change
-  // ============================================================
   function setupRealtime() {
     if (realtimeSetup) return;
     realtimeSetup = true;
@@ -148,7 +162,6 @@ import { supabase } from './supabase-client.js';
       .on('postgres_changes', { event: '*', schema: 'public', table: 'news_articles' }, function (payload) {
         console.log('[Realtime] News article changed on frontend:', payload.eventType);
 
-        // If viewing detail and the article was deleted or unpublished, go back to listing
         if (currentDetailId && (payload.eventType === 'DELETE' || payload.eventType === 'UPDATE')) {
           if (payload.eventType === 'DELETE' && payload.old && payload.old.id === currentDetailId) {
             window.history.replaceState({}, document.title, 'news.html');
@@ -167,7 +180,6 @@ import { supabase } from './supabase-client.js';
               loadListing();
               return;
             }
-            // Content was edited — refresh detail view
             var titleEl = document.getElementById('news-detail-title');
             var dateEl = document.getElementById('news-detail-date');
             var bodyEl = document.getElementById('news-detail-body');
@@ -178,7 +190,6 @@ import { supabase } from './supabase-client.js';
           }
         }
 
-        // Always reload the listing to reflect changes
         if (!currentDetailId) {
           loadListing();
         }
@@ -186,15 +197,13 @@ import { supabase } from './supabase-client.js';
       .subscribe();
   }
 
-  // ============================================================
-  // INIT
-  // ============================================================
   const params = new URLSearchParams(window.location.search);
   const articleId = params.get('id');
 
   if (articleId) {
     loadDetail(articleId);
   } else {
+    showSkeletons();
     loadListing();
   }
 

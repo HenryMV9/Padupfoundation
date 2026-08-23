@@ -2,6 +2,7 @@
    PAD UP FOUNDATION - Gallery (Lightbox, Filters, Dynamic Loader)
    Single source of truth: all images come from Supabase.
    Uses Realtime to live-update when images are added or deleted.
+   Shows skeleton placeholders while loading.
    ============================================================ */
 
 import { supabase } from './supabase-client.js';
@@ -16,9 +17,6 @@ import { supabase } from './supabase-client.js';
 
   if (!grid) return;
 
-  // ============================================================
-  // LIGHTBOX STATE (hoisted to IIFE scope so refreshGalleryItems can access)
-  // ============================================================
   var currentIndex = 0;
   var images = [];
   var touchStartX = 0;
@@ -114,9 +112,6 @@ import { supabase } from './supabase-client.js';
     }, { passive: true });
   }
 
-  // ============================================================
-  // LIGHTBOX ITEM BINDING
-  // ============================================================
   function refreshGalleryItems() {
     var items = document.querySelectorAll('[data-lightbox]');
     images = [];
@@ -139,9 +134,6 @@ import { supabase } from './supabase-client.js';
   refreshGalleryItems();
   window.addEventListener('gallery:refresh', refreshGalleryItems);
 
-  // ============================================================
-  // CATEGORY FILTERS
-  // ============================================================
   var filterBtns = document.querySelectorAll('.filter-btn');
   var activeFilter = 'all';
 
@@ -188,8 +180,18 @@ import { supabase } from './supabase-client.js';
   });
 
   // ============================================================
-  // DYNAMIC IMAGE LOADER (from Supabase)
+  // SKELETON PLACEHOLDERS
   // ============================================================
+  function showSkeletons() {
+    grid.innerHTML = '';
+    for (var i = 0; i < 8; i++) {
+      var skel = document.createElement('div');
+      skel.className = 'masonry-item skeleton-gallery-item';
+      skel.innerHTML = '<div class="skeleton-shimmer"></div>';
+      grid.appendChild(skel);
+    }
+  }
+
   function escapeAttr(str) {
     if (!str) return '';
     return str.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -243,9 +245,6 @@ import { supabase } from './supabase-client.js';
     }
   }
 
-  // ============================================================
-  // REALTIME
-  // ============================================================
   supabase
     .channel('gallery-page-changes')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'gallery_images' }, function (payload) {
@@ -254,5 +253,6 @@ import { supabase } from './supabase-client.js';
     })
     .subscribe();
 
+  showSkeletons();
   loadDynamicImages();
 })();

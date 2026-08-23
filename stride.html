@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="css/styles.css" />
   <link rel="stylesheet" href="css/animations.css" />
   <link rel="stylesheet" href="css/enhancements.css" />
+  <link rel="stylesheet" href="css/additions.css" />
   <style>
     /* ===== STRIDE PAGE STYLES ===== */
     .stride-hero {
@@ -740,6 +741,42 @@
           </div>
         </div>
       </div>
+
+      <!-- Bank Transfer Details -->
+      <div class="bank-transfer-card reveal" style="margin-top: var(--space-8);">
+        <div class="bank-transfer-header">
+          <div class="bank-transfer-icon"><i class="fas fa-building-columns"></i></div>
+          <div>
+            <h3>Prefer a Bank Transfer?</h3>
+            <p>Use these account details to donate directly to STRIDE 2026. Tap an account number to copy it.</p>
+          </div>
+        </div>
+        <div class="bank-transfer-accounts">
+          <div class="bank-account-card" data-account="1018702717">
+            <div class="bank-account-label">Naira (NGN)</div>
+            <div class="bank-account-number">
+              <span class="copyable-account" id="stride-naira-account">1018702717</span>
+              <button class="copy-btn" data-copy="1018702717" aria-label="Copy Naira account number">
+                <i class="fas fa-copy"></i>
+              </button>
+            </div>
+            <div class="bank-account-name">Pad Up Foundation</div>
+            <div class="bank-account-bank">Zenith Bank</div>
+          </div>
+          <div class="bank-account-card" data-account="5072354475">
+            <div class="bank-account-label">USD (Domiciliary)</div>
+            <div class="bank-account-number">
+              <span class="copyable-account" id="stride-usd-account">5072354475</span>
+              <button class="copy-btn" data-copy="5072354475" aria-label="Copy USD account number">
+                <i class="fas fa-copy"></i>
+              </button>
+            </div>
+            <div class="bank-account-name">Pad Up Foundation</div>
+            <div class="bank-account-bank">Zenith Bank</div>
+          </div>
+        </div>
+        <p class="bank-transfer-note"><i class="fas fa-info-circle"></i> After transferring, please send your receipt to <a href="mailto:info@padupfoundation.org">info@padupfoundation.org</a> with "STRIDE 2026" as the subject so we can confirm your donation.</p>
+      </div>
     </div>
   </section>
 
@@ -804,7 +841,7 @@
         </address>
       </div>
       <div class="footer-bottom">
-        <p>&copy; 2026 Pad Up Foundation. All rights reserved.</p>
+        <p>&copy; 2026 Pad Up Foundation. Registered Incorporated Trustees (CAC/IT/NO 153823). SCUML Reg No: SC 331403823.</p>
         <div class="footer-bottom-links">
           <a href="privacy.html">Privacy Policy</a>
           <a href="terms.html">Terms &amp; Conditions</a>
@@ -841,6 +878,7 @@
   <script type="module" src="/js/app.js"></script>
   <script type="module" src="/js/main.js"></script>
   <script type="module" src="/js/stride.js"></script>
+  <script type="module" src="/js/copy-clipboard.js"></script>
 <script type="module" src="/js/cursor.js"></script>
 </body>
 </html>
