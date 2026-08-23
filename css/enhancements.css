@@ -156,12 +156,13 @@
 
 .founder-book-grid {
   display: grid;
-  grid-template-columns: 160px 1fr;
-  gap: var(--space-6);
-  align-items: start;
+  grid-template-columns: minmax(190px, 240px) 1fr;
+  gap: var(--space-8);
+  align-items: center;
 }
 
 .founder-book-cover {
+  display: block;
   width: 100%;
   height: auto;
   max-height: 420px;
@@ -713,11 +714,11 @@
   }
 
   .founder-book-grid {
-    grid-template-columns: 120px 1fr;
+    grid-template-columns: minmax(140px, 180px) 1fr;
   }
 
   .founder-book-cover {
-    height: 180px;
+    max-height: 320px;
   }
 
   .news-grid {
@@ -741,11 +742,12 @@
   .founder-book-grid {
     grid-template-columns: 1fr;
     text-align: center;
+    justify-items: center;
   }
 
   .founder-book-cover {
-    width: 140px;
-    height: 210px;
+    width: 200px;
+    max-height: 300px;
     margin: 0 auto;
   }
 
