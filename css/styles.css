@@ -1915,8 +1915,8 @@ textarea.form-control {
     backdrop-filter: blur(12px);
     flex-direction: column;
     align-items: stretch;
-    padding: var(--space-4);
-    gap: var(--space-1);
+    padding: var(--space-3) var(--space-4) var(--space-6);
+    gap: 0;
     box-shadow: var(--shadow-lg);
     transform: translateY(-100%);
     opacity: 0;
@@ -1925,6 +1925,7 @@ textarea.form-control {
     border-bottom: 1px solid var(--gray-200);
     max-height: calc(100vh - var(--nav-height));
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .navbar-nav.open {
@@ -1933,17 +1934,44 @@ textarea.form-control {
     pointer-events: all;
   }
 
+  .navbar-nav li {
+    border-bottom: 1px solid var(--gray-100);
+  }
+
+  .navbar-nav li:last-child {
+    border-bottom: none;
+  }
+
   .nav-link {
     color: var(--gray-700) !important;
-    padding: var(--space-3) var(--space-4);
+    padding: var(--space-4) var(--space-4);
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+    display: flex;
+    align-items: center;
+    min-height: 52px;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-base);
+  }
+
+  .nav-link:active {
+    background: var(--gray-50);
+    color: var(--primary) !important;
   }
 
   .nav-link:hover { color: var(--primary) !important; }
+
+  .nav-link::after {
+    display: none !important;
+  }
 
   .nav-donate {
     text-align: center;
     margin-left: 0 !important;
     justify-content: center;
+    margin-top: var(--space-2) !important;
+    min-height: 52px;
+    padding: var(--space-4) var(--space-4) !important;
   }
 
   .nav-toggle { display: flex; }
