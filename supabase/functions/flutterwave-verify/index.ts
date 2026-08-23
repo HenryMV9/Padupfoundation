@@ -168,7 +168,7 @@ async function recordDonation(supabase: ReturnType<typeof createClient>, params:
     if (error.code === "23505") {
       return { inserted: false };
     }
-    return { inserted: false, error: error.message };
+    return { inserted: false, error: "Unable to record the donation." };
   }
 
   return { inserted: true };
@@ -271,10 +271,14 @@ Deno.serve(async (req: Request) => {
         transactionId: tx.id,
         amount: tx.amount,
         currency: tx.currency,
-        donorName: donor_name || tx.customer?.name || null,
-        donorEmail: donor_email || tx.customer?.email || null,
-        donorPhone: donor_phone || tx.customer?.phone_number || null,
-        donorMessage: donor_message || null,
+        // Prefer the identity the payment provider verified over anything the
+        // browser sent, so a caller cannot attribute someone else's payment to
+        // a name or address of their choosing.
+        donorName: tx.customer?.name || donor_name || null,
+        donorEmail: tx.customer?.email || donor_email || null,
+        donorPhone: tx.customer?.phone_number || donor_phone || null,
+        // Free text from the browser: bound its length before storing it.
+        donorMessage: typeof donor_message === "string" ? donor_message.slice(0, 1000) : null,
         campaign: paymentCampaign,
         paymentStatus: "successful",
       });
@@ -384,7 +388,8 @@ Deno.serve(async (req: Request) => {
 
     return jsonResponse(404, { error: "Unknown action. Use /verify or /webhook." });
   } catch (err) {
-    console.error("[Flutterwave] Edge function error:", err.message);
-    return jsonResponse(500, { error: err.message });
+    // Log the detail server-side; never return internal error text to the caller.
+    console.error("[Flutterwave] Edge function error:", err instanceof Error ? err.message : err);
+    return jsonResponse(500, { error: "Unable to complete the request." });
   }
 });

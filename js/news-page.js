@@ -35,6 +35,45 @@ import { supabase } from './supabase-client.js';
     return div.innerHTML;
   }
 
+  /**
+   * Article bodies are stored HTML, so they are rendered as markup. Strip the
+   * constructs that turn stored markup into executable code before that
+   * happens: script/style/iframe/object/embed elements, inline event handler
+   * attributes, and javascript: URLs. Formatting markup is preserved.
+   */
+  function sanitizeArticleHtml(html) {
+    if (!html) return '';
+    var template = document.createElement('template');
+    template.innerHTML = String(html);
+
+    var blocked = template.content.querySelectorAll(
+      'script, style, iframe, object, embed, form, link, meta, base, svg, math'
+    );
+    for (var i = 0; i < blocked.length; i++) {
+      blocked[i].parentNode.removeChild(blocked[i]);
+    }
+
+    var all = template.content.querySelectorAll('*');
+    for (var j = 0; j < all.length; j++) {
+      var el = all[j];
+      var attrs = Array.prototype.slice.call(el.attributes);
+      for (var k = 0; k < attrs.length; k++) {
+        var name = attrs[k].name.toLowerCase();
+        var value = (attrs[k].value || '').replace(/[\u0000-\u001F\s]/g, '').toLowerCase();
+        if (name.indexOf('on') === 0 || name === 'srcdoc' || name === 'formaction') {
+          el.removeAttribute(attrs[k].name);
+        } else if (
+          (name === 'href' || name === 'src' || name === 'xlink:href' || name === 'action') &&
+          (value.indexOf('javascript:') === 0 || value.indexOf('data:') === 0 || value.indexOf('vbscript:') === 0)
+        ) {
+          el.removeAttribute(attrs[k].name);
+        }
+      }
+    }
+
+    return template.innerHTML;
+  }
+
   function createNewsCard(article) {
     const card = document.createElement('article');
     card.className = 'news-card news-card-text reveal';
@@ -129,7 +168,7 @@ import { supabase } from './supabase-client.js';
       var bodyEl = document.getElementById('news-detail-body');
       if (titleEl) titleEl.textContent = data.title;
       if (dateEl) dateEl.textContent = formatDate(data.published_at || data.created_at);
-      if (bodyEl) bodyEl.innerHTML = data.content;
+      if (bodyEl) bodyEl.innerHTML = sanitizeArticleHtml(data.content);
       document.title = data.title + ' \u2014 Pad Up Foundation';
     } catch (err) {
       console.error('[News Detail] Failed to load:', err.message);
@@ -185,7 +224,7 @@ import { supabase } from './supabase-client.js';
             var bodyEl = document.getElementById('news-detail-body');
             if (titleEl) titleEl.textContent = payload.new.title;
             if (dateEl) dateEl.textContent = formatDate(payload.new.published_at || payload.new.created_at);
-            if (bodyEl) bodyEl.innerHTML = payload.new.content;
+            if (bodyEl) bodyEl.innerHTML = sanitizeArticleHtml(payload.new.content);
             return;
           }
         }

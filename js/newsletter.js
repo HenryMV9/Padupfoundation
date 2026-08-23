@@ -31,6 +31,13 @@ import { supabase } from './supabase-client.js';
     input.classList.remove('error');
   }
 
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    var div = document.createElement('div');
+    div.textContent = String(str);
+    return div.innerHTML;
+  }
+
   function showFeedback(type, message) {
     if (!feedback) return;
     feedback.className = 'newsletter-feedback ' + type;
@@ -79,7 +86,7 @@ import { supabase } from './supabase-client.js';
   });
 
   // Sync subscriber to Brevo via edge function (fire-and-forget)
-  async function syncToBrevo(email, firstName, subscriberId) {
+  async function syncToBrevo(email) {
     try {
       var apiUrl = (import.meta.env.VITE_SUPABASE_URL || '') + '/functions/v1/brevo-sync/sync';
       var res = await fetch(apiUrl, {
@@ -88,7 +95,10 @@ import { supabase } from './supabase-client.js';
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ' + (import.meta.env.VITE_SUPABASE_ANON_KEY || '')
         },
-        body: JSON.stringify({ email: email, first_name: firstName, subscriber_id: subscriberId })
+        // Only the address is sent. The name and the record it belongs to are
+        // read server-side from the stored subscription, so they cannot be
+        // supplied by the browser.
+        body: JSON.stringify({ email: email })
       });
       var data = await res.json().catch(function () { return {}; });
       if (!res.ok) {
@@ -125,12 +135,12 @@ import { supabase } from './supabase-client.js';
           throw error;
         }
       } else {
-        showFeedback('success', 'Thank you for subscribing, ' + name + '! You\'ve joined our community of changemakers. Watch your inbox for inspiring stories and impact updates.');
+        showFeedback('success', 'Thank you for subscribing, ' + escapeHtml(name) + '! You\'ve joined our community of changemakers. Watch your inbox for inspiring stories and impact updates.');
         form.reset();
         nameInput.classList.remove('success', 'error');
         emailInput.classList.remove('success', 'error');
 
-        syncToBrevo(email, name, null);
+        syncToBrevo(email);
       }
     } catch (err) {
       console.error('[Newsletter] Error:', err.message);

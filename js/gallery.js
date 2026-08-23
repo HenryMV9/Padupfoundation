@@ -194,7 +194,23 @@ import { supabase } from './supabase-client.js';
 
   function escapeAttr(str) {
     if (!str) return '';
-    return str.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  // Only http(s) or same-origin relative addresses may reach an image src, so a
+  // stored value can never turn into javascript: or data: markup.
+  function safeImageUrl(url) {
+    if (!url) return '';
+    var value = String(url).trim();
+    if (/^https?:\/\//i.test(value) || value.charAt(0) === '/') {
+      return escapeAttr(value);
+    }
+    return '';
   }
 
   async function loadDynamicImages() {
@@ -223,7 +239,7 @@ import { supabase } from './supabase-client.js';
         item.setAttribute('tabindex', '0');
         item.setAttribute('aria-label', 'View: ' + (img.caption || 'Gallery image'));
         item.innerHTML =
-          '<img src="' + img.image_url + '" alt="' + escapeAttr(img.caption || 'Gallery image') + '" loading="lazy" />' +
+          '<img src="' + safeImageUrl(img.image_url) + '" alt="' + escapeAttr(img.caption || 'Gallery image') + '" loading="lazy" />' +
           '<div class="masonry-item-overlay"><i class="fas fa-expand" aria-hidden="true"></i></div>';
         grid.appendChild(item);
       });

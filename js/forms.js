@@ -120,92 +120,9 @@
   }
 })();
 
-/* --- Flutterwave Donation --- */
-(function initDonation() {
-  const amountBtns = document.querySelectorAll('.amount-btn');
-  const customInput = document.getElementById('custom-amount');
-  const donateBtn = document.getElementById('donate-btn');
-
-  if (!donateBtn) return;
-
-  let selectedAmount = 5000;
-
-  amountBtns.forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      amountBtns.forEach(function (b) { b.classList.remove('selected'); });
-      btn.classList.add('selected');
-      selectedAmount = parseInt(btn.dataset.amount, 10);
-      if (customInput) customInput.value = '';
-    });
-  });
-
-  if (customInput) {
-    customInput.addEventListener('input', function () {
-      amountBtns.forEach(function (b) { b.classList.remove('selected'); });
-      selectedAmount = parseInt(this.value, 10) || 0;
-    });
-  }
-
-  donateBtn.addEventListener('click', function () {
-    const nameEl = document.getElementById('donor-name');
-    const emailEl = document.getElementById('donor-email');
-    const phoneEl = document.getElementById('donor-phone');
-
-    const name = nameEl ? nameEl.value.trim() : 'Anonymous';
-    const email = emailEl ? emailEl.value.trim() : 'donor@padupfoundation.org';
-    const phone = phoneEl ? phoneEl.value.trim() : '08000000000';
-
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      if (emailEl) {
-        emailEl.focus();
-        emailEl.classList.add('error');
-        const group = emailEl.closest('.form-group');
-        if (group) {
-          group.classList.add('has-error');
-          const msg = group.querySelector('.error-msg');
-          if (msg) msg.textContent = 'Please enter a valid email address.';
-        }
-      }
-      return;
-    }
-
-    if (!selectedAmount || selectedAmount < 100) {
-      alert('Please select or enter a donation amount of at least ₦100.');
-      return;
-    }
-
-    if (typeof FlutterwaveCheckout === 'undefined') {
-      alert('Payment gateway is loading. Please try again in a moment.');
-      return;
-    }
-
-    FlutterwaveCheckout({
-      public_key: 'FLWPUBK_TEST-XXXXXXXXXXXXXXXXXXXXXXXXXXXX-X',
-      tx_ref: 'padup-' + Date.now(),
-      amount: selectedAmount,
-      currency: 'NGN',
-      payment_options: 'card, banktransfer, ussd, mobilemoney',
-      customer: {
-        email: email,
-        phone_number: phone,
-        name: name
-      },
-      customizations: {
-        title: 'Pad Up Foundation',
-        description: 'Donation — Ending Period Poverty',
-        logo: window.location.origin + '/images/Padupfoundation-LOGO.jpg'
-      },
-      callback: function (payment) {
-        if (payment.status === 'successful' || payment.status === 'completed') {
-          const successMsg = document.getElementById('donation-success');
-          if (successMsg) {
-            successMsg.style.display = 'flex';
-            successMsg.querySelector('.donation-amount').textContent =
-              '₦' + selectedAmount.toLocaleString();
-          }
-        }
-      },
-      onclose: function () {}
-    });
-  });
-})();
+/* --- Donations ---
+   The donation flow lives entirely in js/donation.js, which records the
+   donation server-side and only confirms it once the payment has been verified
+   with the payment provider. The earlier handler that lived here trusted the
+   browser's own "successful" callback and carried a placeholder payment key, so
+   it has been removed rather than left shipping alongside the real one. */

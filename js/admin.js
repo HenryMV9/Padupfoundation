@@ -173,8 +173,6 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
           display = 'Too many login attempts. Please wait a moment and try again.';
         } else if (msg.indexOf('Failed to fetch') !== -1 || msg.indexOf('NetworkError') !== -1) {
           display = 'Network error. Please check your internet connection and try again.';
-        } else if (msg) {
-          display = 'Login failed: ' + msg;
         } else {
           display = 'Invalid credentials. Please check your email and password.';
         }
@@ -312,10 +310,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       var apiUrl = (import.meta.env.VITE_SUPABASE_URL || '') + '/functions/v1/admin-subscribers/count';
       var res = await fetch(apiUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + (import.meta.env.VITE_SUPABASE_ANON_KEY || '')
-        },
+        headers: await authHeaders(),
         body: JSON.stringify({})
       });
       var data = await res.json().catch(function () { return {}; });
@@ -362,7 +357,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       }
     } catch (err) {
       console.error('[Admin] Overview fetch error:', err.message, err.details || '', err.hint || '', err);
-      showToast('error', 'Failed to load', 'Could not load overview data. ' + err.message);
+      showToast('error', 'Failed to load', 'Could not load overview data. Please try again.');
     }
   }
 
@@ -398,7 +393,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       updateDonationSummary();
     } catch (err) {
       console.error('[Admin] Donations fetch error:', err.message, err.details || '', err.hint || '', err);
-        tbody.innerHTML = '<tr><td colspan="7" class="admin-empty-state"><i class="fas fa-exclamation-circle"></i><p>Failed to load donations: ' + err.message + '</p></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="admin-empty-state"><i class="fas fa-exclamation-circle"></i><p>Could not load donations. Please refresh and try again.</p></td></tr>';
     }
   }
 
@@ -510,7 +505,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       renderNews();
     } catch (err) {
       console.error('[Admin] News fetch error:', err.message, err.details || '', err.hint || '', err);
-      tbody.innerHTML = '<tr><td colspan="4" class="admin-empty-state"><i class="fas fa-exclamation-circle"></i><p>Failed to load articles: ' + err.message + '</p></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="4" class="admin-empty-state"><i class="fas fa-exclamation-circle"></i><p>Could not load articles. Please refresh and try again.</p></td></tr>';
     }
   }
 
@@ -643,7 +638,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
         console.error('[Admin] News save error:', err.message, err.details || '', err.hint || '', err);
         if (feedback) {
           feedback.className = 'admin-login-feedback error-state';
-          feedback.innerHTML = '<i class="fas fa-exclamation-circle"></i> Failed to save: ' + err.message;
+          feedback.innerHTML = '<i class="fas fa-exclamation-circle"></i> The article could not be saved. Please try again.';
         }
       } finally {
         saveBtn.innerHTML = originalText;
@@ -668,7 +663,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       loadOverview();
     } catch (err) {
       console.error('[Admin] News toggle error:', err.message, err.details || '', err.hint || '', err);
-      showToast('error', 'Update failed', err.message);
+      showToast('error', 'Update failed', 'The article could not be updated. Please try again.');
     }
   }
 
@@ -685,7 +680,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       loadOverview();
     } catch (err) {
       console.error('[Admin] News delete error:', err.message, err.details || '', err.hint || '', err);
-      showToast('error', 'Delete failed', err.message);
+      showToast('error', 'Delete failed', 'The article could not be deleted. Please try again.');
     }
   }
 
@@ -707,7 +702,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       renderGallery();
     } catch (err) {
       console.error('[Admin] Gallery fetch error:', err.message, err.details || '', err.hint || '', err);
-      grid.innerHTML = '<div class="admin-empty-state" style="grid-column: 1/-1;"><i class="fas fa-exclamation-circle"></i><p>Failed to load gallery: ' + err.message + '</p></div>';
+      grid.innerHTML = '<div class="admin-empty-state" style="grid-column: 1/-1;"><i class="fas fa-exclamation-circle"></i><p>Could not load the gallery. Please refresh and try again.</p></div>';
     }
   }
 
@@ -721,7 +716,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
 
     grid.innerHTML = allGallery.map(function (img) {
       return '<div class="admin-gallery-item">' +
-        '<img src="' + img.image_url + '" alt="' + escapeHtml(img.caption || 'Gallery image') + '" loading="lazy" />' +
+        '<img src="' + safeImageUrl(img.image_url) + '" alt="' + escapeAttr(img.caption || 'Gallery image') + '" loading="lazy" />' +
         '<div class="admin-gallery-item-overlay">' +
           '<span class="admin-gallery-item-caption">' + escapeHtml(img.caption || img.category) + '</span>' +
           '<button class="admin-action-btn delete" data-delete-gallery="' + img.id + '" title="Delete"><i class="fas fa-trash"></i></button>' +
@@ -759,7 +754,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
           loadOverview();
         } catch (err) {
           console.error('[Admin] Gallery delete failed:', err.message, err);
-          showToast('error', 'Delete failed', err.message);
+          showToast('error', 'Delete failed', 'The image could not be deleted. Please try again.');
         }
       });
     });
@@ -899,7 +894,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
         loadOverview();
       } catch (err) {
         console.error('[Admin] Gallery upload failed:', err.message, err);
-        showGalleryFeedback('error-state', err.message || 'Upload failed');
+        showGalleryFeedback('error-state', 'The image could not be uploaded. Please try again.');
       } finally {
         uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Upload';
         uploadBtn.disabled = false;
@@ -918,10 +913,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       var apiUrl = (import.meta.env.VITE_SUPABASE_URL || '') + '/functions/v1/admin-subscribers/subscribers';
       var res = await fetch(apiUrl, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + (import.meta.env.VITE_SUPABASE_ANON_KEY || '')
-        }
+        headers: await authHeaders()
       });
       var data = await res.json().catch(function () { return {}; });
       if (!res.ok) throw new Error(data.error || 'Failed to load subscribers');
@@ -929,7 +921,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
       renderSubscribers();
     } catch (err) {
       console.error('[Admin] Subscribers fetch error:', err.message, err);
-      tbody.innerHTML = '<tr><td colspan="4" class="admin-empty-state"><i class="fas fa-exclamation-circle"></i><p>Failed to load subscribers: ' + err.message + '</p></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="4" class="admin-empty-state"><i class="fas fa-exclamation-circle"></i><p>Could not load subscribers. Please refresh and try again.</p></td></tr>';
     }
   }
 
@@ -995,10 +987,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
         var apiUrl = (import.meta.env.VITE_SUPABASE_URL || '') + '/functions/v1/brevo-sync/sync-all';
         var res = await fetch(apiUrl, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + (import.meta.env.VITE_SUPABASE_ANON_KEY || '')
-          },
+          headers: await authHeaders(),
           body: JSON.stringify({})
         });
         var data = await res.json().catch(function () { return {}; });
@@ -1008,7 +997,7 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
         loadOverview();
       } catch (err) {
         console.error('[Admin] Brevo sync error:', err.message, err);
-        showToast('error', 'Sync failed', err.message);
+        showToast('error', 'Sync failed', 'The sync could not be completed. Please try again.');
       } finally {
         brevoSyncBtn.innerHTML = '<i class="fas fa-sync"></i> Sync to Brevo';
         brevoSyncBtn.disabled = false;
@@ -1057,6 +1046,49 @@ import { supabase, STORAGE_BUCKET } from './supabase-client.js';
     var div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
+  }
+
+  // escapeHtml() does not escape quotes, so it is unsafe inside an HTML
+  // attribute. Use this for anything interpolated into an attribute value.
+  function escapeAttr(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  // Only allow http(s) and same-origin relative URLs into an image src, so a
+  // stored value can never become javascript: or data: markup.
+  function safeImageUrl(url) {
+    if (!url) return '';
+    var value = String(url).trim();
+    if (/^https?:\/\//i.test(value) || value.charAt(0) === '/') {
+      return escapeAttr(value);
+    }
+    return '';
+  }
+
+  // Returns the signed-in user's access token for calls to our own backend
+  // functions. The publishable anon key identifies the project, not a user, so
+  // it must never be used as the caller's credential.
+  async function authHeaders() {
+    var session = null;
+    try {
+      var result = await supabase.auth.getSession();
+      session = result && result.data ? result.data.session : null;
+    } catch (err) {
+      console.error('[Admin] Session lookup failed:', err);
+    }
+    if (!session || !session.access_token) {
+      throw new Error('Your session has expired. Please sign in again.');
+    }
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + session.access_token
+    };
   }
 
   function truncateText(str, n) {

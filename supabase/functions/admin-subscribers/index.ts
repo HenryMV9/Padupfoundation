@@ -3,6 +3,11 @@
    Fetches all newsletter subscribers using the service role key,
    bypassing RLS so the admin panel always sees every subscriber.
 
+   ACCESS CONTROL: the service role key bypasses RLS, so this function
+   must authorize the caller itself. Every request must carry the
+   Authorization header of a signed-in user whose app_metadata.role is
+   'admin'. The project anon key is NOT sufficient — it is public.
+
    Endpoints:
    GET  /subscribers  — returns all subscribers (newest first)
    POST /count        — returns total subscriber count
@@ -23,12 +28,58 @@ function jsonResponse(status: number, body: Record<string, unknown>) {
   });
 }
 
+/**
+ * Resolves the caller from their Authorization bearer token and confirms they
+ * hold the admin role. Returns null when the caller is a valid admin, or a
+ * Response to return immediately when they are not.
+ *
+ * The role is read from app_metadata, which only the service role can write —
+ * never from user_metadata, which the user can edit themselves.
+ */
+async function requireAdmin(req: Request): Promise<Response | null> {
+  const authHeader = req.headers.get("Authorization") || "";
+  const token = authHeader.replace(/^Bearer\s+/i, "").trim();
+
+  if (!token) {
+    return jsonResponse(401, { error: "Authentication required." });
+  }
+
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
+
+  // The anon key is a valid project JWT but represents no user. Reject it
+  // outright so it can never be mistaken for a credential.
+  if (token === anonKey) {
+    return jsonResponse(401, { error: "Authentication required." });
+  }
+
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+  const authClient = createClient(supabaseUrl, anonKey, {
+    global: { headers: { Authorization: `Bearer ${token}` } },
+  });
+
+  const { data, error } = await authClient.auth.getUser(token);
+
+  if (error || !data?.user) {
+    return jsonResponse(401, { error: "Authentication required." });
+  }
+
+  const meta = (data.user.app_metadata || {}) as Record<string, unknown>;
+  if (meta.role !== "admin") {
+    return jsonResponse(403, { error: "Administrator access required." });
+  }
+
+  return null;
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 200, headers: corsHeaders });
   }
 
   try {
+    const denied = await requireAdmin(req);
+    if (denied) return denied;
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -68,7 +119,8 @@ Deno.serve(async (req: Request) => {
 
     return jsonResponse(404, { error: "Unknown action. Use GET /subscribers or POST /count." });
   } catch (err) {
-    console.error("[Admin-Subscribers] Error:", err.message);
-    return jsonResponse(500, { error: err.message });
+    // Log the detail server-side; never return internal error text to the caller.
+    console.error("[Admin-Subscribers] Error:", err instanceof Error ? err.message : err);
+    return jsonResponse(500, { error: "Unable to complete the request." });
   }
 });
